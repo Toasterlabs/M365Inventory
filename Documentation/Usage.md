@@ -1,4 +1,4 @@
-#Usage
+# Usage
 ## Introduction
 The usage of the tool has been kept as simple as possible intentionally. Below is a step-by-step walkthrough of the tool as it stands on February 2nd, 2019.
 
