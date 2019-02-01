@@ -1,0 +1,493 @@
+﻿<Window 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Name="Window" 
+        Title="M365 Inventory Automaton" 
+        WindowStartupLocation="CenterScreen" 
+        WindowStyle="None" 
+        AllowsTransparency="True"
+        Background="Transparent" 
+        Opacity="1"
+        Height="600"
+        Width="1000"
+    >
+    <Window.Resources>
+        <Style x:Key="MyFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Control}">
+                        <Grid Margin="3 2">
+                            <Rectangle Name="r1" StrokeThickness="1" Stroke="Black" StrokeDashArray="2 2"/>
+                            <Border Name="border" Width="{TemplateBinding ActualWidth}" Height="{TemplateBinding ActualHeight}" CornerRadius="8" BorderThickness="1" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ShadowStyle">
+            <Setter Property="Control.Foreground" Value="LightGray" />
+        </Style>
+        <Style x:Key="ComboBoxTest2" TargetType="{x:Type ComboBox}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Grid.Column="2" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}" >
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="20" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border x:Name="Border"  Grid.ColumnSpan="2" CornerRadius="0" Background="White" BorderBrush="Black" BorderThickness="1" />
+                                            <Border Grid.Column="0" CornerRadius="0" Margin="1" Background="White" BorderBrush="Black" BorderThickness="0,0,1,0" />
+                                            <Path x:Name="Arrow" Grid.Column="1" Fill="Black" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z" />
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="ToggleButton.IsMouseOver" Value="true">
+                                                <Setter TargetName="Border" Property="Background" Value="SkyBlue" />
+                                            </Trigger>
+                                            <Trigger Property="ToggleButton.IsChecked" Value="true">
+                                                <Setter TargetName="Border" Property="Background" Value="#E0E0E0" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Border" Property="Background" Value="#EEEEEE" />
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="#AAAAAA" />
+                                                <Setter Property="Foreground" Value="#888888"/>
+                                                <Setter TargetName="Arrow" Property="Fill" Value="#888888" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="3"  />
+                            <TextBox x:Name="PART_EditableTextBox" Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True"  Focusable="False" PopupAnimation="Slide">
+                                <Grid  Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" Background="White" BorderThickness="1" BorderBrush="Black" />
+                                    <ScrollViewer SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border>
+                            <Grid Background="{TemplateBinding Background}">
+                                <ContentPresenter />
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key = "CustomButton"  TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontFamily" Value="Segui"/>
+            <Setter Property="FontSize" Value="12px"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource MyFocusVisual}" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" 
+        				BorderThickness="1"
+        				Padding="4,2" 
+        				BorderBrush="DarkGray" 
+        				CornerRadius="3" 
+        				Background="{TemplateBinding Background}">
+                            <Grid >
+                                <ContentPresenter HorizontalAlignment="Center" 
+        	                           VerticalAlignment="Center" Name="contentShadow" 
+        					Style="{StaticResource ShadowStyle}">
+                                    <ContentPresenter.RenderTransform>
+                                        <TranslateTransform X="1.0" Y="1.0" />
+                                    </ContentPresenter.RenderTransform>
+                                </ContentPresenter>
+                                <ContentPresenter HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" Name="content"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="LightSkyBlue" />
+                                <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="Background" Value="LightSkyBlue"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" >
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" >
+                                            <GradientStop Color="#FFFFD190" Offset="0.35"/>
+                                            <GradientStop Color="Orange" Offset="0.95"/>
+                                            <GradientStop Color="#FFFFD190" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="content" Property="RenderTransform" >
+                                    <Setter.Value>
+                                        <TranslateTransform Y="1.0" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsDefaulted" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF282828" />
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF282828" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7" />
+                                <Setter Property="Foreground" Value="Gray" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <ControlTemplate x:Key="MenuItemControlTemplate1" TargetType="{x:Type MenuItem}">
+            <Border x:Name="templateRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ContentPresenter x:Name="Icon" Content="{TemplateBinding Icon}" ContentSource="Icon" HorizontalAlignment="Center" Height="16" Margin="3" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center" Width="16"/>
+                    <Path x:Name="GlyphPanel" Data="F1M10,1.2L4.7,9.1 4.5,9.1 0,5.2 1.3,3.5 4.3,6.1 8.3,0 10,1.2z" Fill="{TemplateBinding Foreground}" FlowDirection="LeftToRight" Margin="3" Visibility="Collapsed" VerticalAlignment="Center"/>
+                    <ContentPresenter ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" Grid.Column="1" ContentStringFormat="{TemplateBinding HeaderStringFormat}" ContentSource="Header" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" Placement="Bottom">
+                        <Border x:Name="SubMenuBorder" BorderBrush="#FF999999" BorderThickness="1" Background="White" Padding="2">
+                            <ScrollViewer x:Name="SubMenuScrollViewer" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                                <Grid RenderOptions.ClearTypeHint="Enabled">
+                                    <Canvas HorizontalAlignment="Left" Height="0" VerticalAlignment="Top" Width="0">
+                                        <Rectangle x:Name="OpaqueRect" Fill="{Binding Background, ElementName=SubMenuBorder}" Height="{Binding ActualHeight, ElementName=SubMenuBorder}" Width="{Binding ActualWidth, ElementName=SubMenuBorder}"/>
+                                    </Canvas>
+                                    <Rectangle Fill="White" HorizontalAlignment="Left" Margin="29,2,0,2" Width="1"/>
+                                    <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle"/>
+                                </Grid>
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSuspendingPopupAnimation" Value="True">
+                    <Setter Property="PopupAnimation" TargetName="PART_Popup" Value="None"/>
+                </Trigger>
+                <Trigger Property="Icon" Value="{x:Null}">
+                    <Setter Property="Visibility" TargetName="Icon" Value="Collapsed"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Visibility" TargetName="GlyphPanel" Value="Visible"/>
+                    <Setter Property="Visibility" TargetName="Icon" Value="Collapsed"/>
+                </Trigger>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" TargetName="templateRoot" Value="SkyBlue"/>
+                    <Setter Property="BorderBrush" TargetName="templateRoot" Value="Black"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="TextElement.Foreground" TargetName="templateRoot" Value="White"/>
+                    <Setter Property="Fill" TargetName="GlyphPanel" Value="White"/>
+                </Trigger>
+                <Trigger Property="CanContentScroll" SourceName="SubMenuScrollViewer" Value="False">
+                    <Setter Property="Canvas.Top" TargetName="OpaqueRect" Value="{Binding VerticalOffset, ElementName=SubMenuScrollViewer}"/>
+                    <Setter Property="Canvas.Left" TargetName="OpaqueRect" Value="{Binding HorizontalOffset, ElementName=SubMenuScrollViewer}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <DataTemplate x:Key="HeaderTemplate">
+            <DockPanel>
+                <TextBlock FontSize="10" Foreground="Green" FontWeight="Bold" >
+                    <TextBlock.Text>
+                        <Binding/>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DockPanel>
+        </DataTemplate>
+    </Window.Resources>
+    <Border x:Name="MainBorder" Margin="0,0,0,0" CornerRadius="8" BorderThickness="1" BorderBrush="Black" Padding="0" >
+        <Border.Effect>
+            <DropShadowEffect x:Name="DSE" Color="Black" Direction="270" BlurRadius="20" ShadowDepth="3" Opacity="0.6" />
+        </Border.Effect>
+        <Border.Triggers>
+            <EventTrigger RoutedEvent="Window.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="DSE" Storyboard.TargetProperty="ShadowDepth" From="0" To="3" Duration="0:0:1" AutoReverse="False" />
+                        <DoubleAnimation Storyboard.TargetName="DSE" Storyboard.TargetProperty="BlurRadius" From="0" To="20" Duration="0:0:1" AutoReverse="False" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Border.Triggers>
+        <Grid x:Name="Grid" Margin="0,0,0,0">
+            <Border Name="Mask" CornerRadius="8" Background="White" Margin="0,0,0,0" />
+            <Grid Margin="0,0,0,0">
+                <Grid.OpacityMask>
+                    <VisualBrush Visual="{Binding ElementName=Mask}"/>
+                </Grid.OpacityMask>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="TitleBar" Grid.Row="0"  Text="M365 Inventory Automaton" IsReadOnly="True" IsHitTestVisible="False" Padding="10" FontFamily="Segui" FontSize="14" 
+                         Foreground="White" FontWeight="Normal" Background="Blue" HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" HorizontalContentAlignment="Center" 
+                         BorderThickness="0" Height="40" Grid.ColumnSpan="2"/>
+                <Button Name="BTN_Close" Grid.Row="0" Grid.Column="1" Cursor="Hand" Background="transparent" >
+                    <Image x:Name="IMG_Close" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\DesignAutomation\Resources\Icons\appbar.Close_White.png"/>
+                </Button>
+                <Menu x:Name="MenuBar" Margin="0,0,0,541" Grid.Row="1" Grid.ColumnSpan="2" Background="White">
+                    <MenuItem Template="{DynamicResource MenuItemControlTemplate1}">
+                        <MenuItem.Header>
+                            <TextBlock Text="File" Cursor="Hand" FontWeight="Bold"  HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </MenuItem.Header>
+                        <MenuItem x:Name="File_Run" Cursor="Hand" Header="_Run reports" InputGestureText ='F6' ToolTip='Run collection'>
+                            <MenuItem.Icon>
+                                <Image x:Name="File_Run_IMG" Cursor="Hand" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\DesignAutomation\Resources\Icons\appbar.control.play.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem x:Name="File_Save" Cursor="Hand" Header="_Save" InputGestureText ='F7' ToolTip='Save collected data'>
+                            <MenuItem.Icon>
+                                <Image x:Name="File_Save_IMG" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\DesignAutomation\Resources\Icons\appbar.save.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem x:Name="File_Exit" Cursor="Hand" Header="_Exit" InputGestureText ='Ctrl+E' ToolTip='Exit the application'>
+                            <MenuItem.Icon>
+                                <Image x:Name="File_Close_IMG" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\DesignAutomation\Resources\Icons\appbar.close_black.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem x:Name="Help" Cursor="Hand" Template="{DynamicResource MenuItemControlTemplate1}">
+                        <MenuItem.Header>
+                            <TextBlock Text="Help" Cursor="Hand" FontWeight="Bold"  HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </MenuItem.Header>
+                        <MenuItem x:Name="Help_About" Cursor="Hand" Header="_About" RenderTransformOrigin="0.307,0.388" >
+                            <MenuItem.Icon>
+                                <Image x:Name="Help_About_IMG" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Icons\appbar.folder.open.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+                </Menu>
+                <TabControl x:Name="tabControl" Grid.Row="1"  HorizontalAlignment="Left" BorderBrush="White" Foreground="White" Margin="5,20,0,5" Grid.ColumnSpan="2" Width="983">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Grid Name="Panel">
+                                            <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Panel" Property="Background" Value="LightSkyBlue" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="False">
+                                                <Setter TargetName="Panel" Property="Background" Value="White" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
+                    <TabItem x:Name="TabItem_Home" Header="Home" Foreground="Black" BorderBrush="White" Background="White" FontStyle="Italic">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                                <RowDefinition Height="28"/>
+                            </Grid.RowDefinitions>
+                            <Button Name="BTN_Wizard" HorizontalAlignment="Right" Grid.Row="8" Grid.Column="8" Grid.RowSpan="11" Cursor="Hand" Background="transparent" >
+                                <Image x:Name="IMG_Wizard" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Images\wizard.png"/>
+                            </Button>
+                            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Foreground="Blue" Content="Prerequisites" Height="25" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="0" Grid.Row="1"  x:Name="Prereq_IMG_Admin"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Icons\Check.Light.off.png"/>
+                            <Label Grid.Column="1" Grid.Row="1" Content="Running as Administrator" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="Prereq_IMG_Internet" Width="20" Height="20" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Icons\Check.Light.off.png"/>
+                            <Label Grid.Column="1" Grid.Row="2" Content="Internet connection" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="0" Grid.Row="3" x:Name="Prereq_IMG_SPOMgmtShell" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Icons\Check.Light.off.png"/>
+                            <Label Grid.Column="1" Grid.Row="3" Content="SPO Management Shell" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="2" Grid.Row="1" x:Name="Prereq_IMG_AADModule" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="1"  Content="Azure AD Module" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="2" Grid.Row="2" x:Name="Prereq_IMG_MSTeams"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="2" Content="Microsoft Teams module" VerticalContentAlignment="Center"/>
+                            <Label Grid.Column="3" Grid.Row="3" Content="Credentials validated" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="2" Grid.Row="3" x:Name="Prereq_IMG_CredValidate"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="4" Content="Connected to Services" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="2" Grid.Row="4" x:Name="Prereq_IMG_Connected"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" Foreground="Blue" Content="Connections" Height="25" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="4" Grid.Row="1" x:Name="Conn_IMG_AAD"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="1" Content="Azure Active Directory" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="4" Grid.Row="2" x:Name="Conn_IMG_EXO"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="2" Content="Exchange Online"/>
+                            <Image Grid.Column="4" Grid.Row="3" x:Name="Conn_IMG_M365"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="3" Content="Microsoft 365" />
+                            <Image Grid.Column="4" Grid.Row="4" x:Name="Conn_IMG_SPO"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="4" Content="SharePoint Online"/>
+                            <Label Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2" HorizontalAlignment="Left" Foreground="Blue" Content="Activities" Height="25" VerticalContentAlignment="Center"/>
+                            <TextBox Grid.Column="6" Grid.Row="1" Grid.RowSpan="4" Grid.ColumnSpan="2" x:Name="TXT_Output" TextWrapping="Wrap" Text="" IsReadOnly="true" FontStyle="Normal"  VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" BorderThickness="0" Width="427"/>
+                            <Label Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Foreground="Blue" Content="Reports" Height="25" VerticalContentAlignment="Center"/>
+                            <Image Grid.Column="0" Grid.Row="7" x:Name="IMG_Report_AllSites"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="1" Grid.Row="7" Content="SPO - All sites"/>
+                            <Image Grid.Column="0" Grid.Row="8" x:Name="IMG_Report_AllSiteGroups"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="1" Grid.Row="8" Content="SPO - All site groups"/>
+                            <Image Grid.Column="0" Grid.Row="9" x:Name="IMG_Report_SPOLibrariesgt100"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="1" Grid.Row="9" Content="SPO - Libraries gt 100"/>
+                            <Image Grid.Column="0" Grid.Row="10" x:Name="IMG_Report_SPOLibrariesgt0"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="1" Grid.Row="10" Content="SPO - Libraries gt 0"/>
+                            <Image Grid.Column="4" Grid.Row="11" x:Name="IMG_Report_AADUsers"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="11" Content="AAD User Report"/>
+                            
+                            <Image Grid.Column="4" Grid.Row="7" x:Name="IMG_Report_AADDelUser"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="7" Content="AAD Deleted Users"/>
+                            <Image Grid.Column="4" Grid.Row="8" x:Name="IMG_Report_AADContacts"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="8" Content="AAD Contacts"/>
+                            <Image Grid.Column="4" Grid.Row="9" x:Name="IMG_Report_AADGroups"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="9" Content="AAD Groups"/>
+                            <Image Grid.Column="4" Grid.Row="10" x:Name="IMG_Report_AADDomains"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="5" Grid.Row="10" Content="AAD Domains"/>
+                            <Image Grid.Column="2" Grid.Row="7" x:Name="IMG_Report_EXOMailboxes"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="7" Content="ExO Mailboxes"/>
+                            <Image Grid.Column="2" Grid.Row="9" x:Name="IMG_Report_EXOArchives"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="9" Content="ExO Archives"/>
+                            <Image Grid.Column="2" Grid.Row="8" x:Name="IMG_Report_EXOGroups"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="8" Content="ExO Groups"/>
+                            <Image Grid.Column="2" Grid.Row="10" x:Name="IMG_Report_Graph"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="3" Grid.Row="10" Content="Azure Graph Reports"/>
+                            <Image Grid.Column="0" Grid.Row="11" x:Name="IMG_Report_VSTS"  HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="20" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/Check.Light.Off.png"/>
+                            <Label Grid.Column="1" Grid.Row="11" Content="Azure DevOps Projects"/>
+                        </Grid>
+                    </TabItem>
+                    <TabItem x:Name="TabItem_Settings" Header="Settings" Foreground="Black" BorderBrush="White" Background="White" FontStyle="Italic">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                            </Grid.RowDefinitions>
+                            <Border Padding="10"  Grid.Row="1" Grid.Column="0" Grid.RowSpan="28" 
+                                Canvas.Top="30"
+                                VerticalAlignment="Top"
+                                BorderBrush="Black"
+                                BorderThickness="0"
+                                CornerRadius="18">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="5"
+                                    Opacity=".5"
+                                    ShadowDepth="3" />
+                                </Border.Effect>
+                                <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="18" Name="ReceiverColor"
+                                    BorderBrush="Black"
+                                    BorderThickness="2"
+                                    CornerRadius="15">
+                                    <Grid>
+                                        <Border Name="Mask2"
+                                            Background="White"
+                                            BorderBrush="#FF3B5998"
+                                            BorderThickness=".5"
+                                            CornerRadius="13">
+                                        </Border>
+                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <StackPanel.OpacityMask>
+                                                <VisualBrush Visual="{Binding ElementName=Mask2}" />
+                                            </StackPanel.OpacityMask>
+                                            <Image x:Name="IMG_Settings_LastMile" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Images\LastMile_flipped.jpg"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Border>
+                            <Label Grid.Row="1" Grid.Column="2" Content="Output Directory:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <Image Grid.Row="1" Grid.Column="1" x:Name="IMG_Settings_OutputDir" Source="C:\Dev\PSSharedModule\PSSharedModule\Scripts\M365InventoryAutomaton\Resources\Icons\appbar.folder.open.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <TextBox Grid.Row="1" Grid.Column="3" x:Name="txt_Settings_OutputDir" Height="30"  Padding="5" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="" IsReadOnly="true" />
+                            <Button Grid.Row="1" Grid.Column="5" x:Name="btn_settings_OutputDir" Content="Browse" ToolTip="Open browse dialog" Width="80" Height="28" Style="{StaticResource CustomButton}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Image Grid.Row="2" Grid.Column="1" x:Name="IMG_Settings_M365Username" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Images/user.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <Label Grid.Row="2" Grid.Column="2" Content="M365 Username:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <TextBox Grid.Row="2" Grid.Column="3" x:Name="txt_Settings_M365Username" Padding="5" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="john.doe@contoso.com" Height="30"/>
+                            <Image Grid.Row="3" Grid.Column="1" x:Name="IMG_Settings_M365Password" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Icons/appbar.interface.password.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <Label Grid.Row="3" Grid.Column="2" Content="M365 Password:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <PasswordBox Grid.Row="3" Grid.Column="3" x:Name="txt_Settings_M365Password" HorizontalAlignment="Center" Padding="5" VerticalAlignment="Center" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Height="30" Width="250"/>
+                            <Button Grid.Row="3" Grid.Column="5" x:Name="btn_settings_Credentials_Validate" ToolTip="Validate the entered credentials. This will take a few seconds!" Content="Validate" Width="80" Height="28" Style="{StaticResource CustomButton}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Image Grid.Row="4" Grid.Column="1" x:Name="IMG_Settings_tenant" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Images/Microsoft.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <TextBox Grid.Row="4" Grid.Column="3" x:Name="txt_Settings_tenant" Height="30" Padding="5" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="contoso.onmicrosoft.com" />
+                            <Label Grid.Row="4" Grid.Column="2" Content="M365 Tenant:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <Label Grid.Row="5" Grid.Column="2" Content="M365 Region:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <Image Grid.Row="5" Grid.Column="1"  x:Name="IMG_Settings_tenantRegion" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Images/Microsoft.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <ComboBox Grid.Row="5" Grid.Column="3" x:Name="CB_Settings_TenantRegion" Style="{StaticResource ComboBoxTest2}" SelectedItem="{Binding SelectedItem}" IsSynchronizedWithCurrentItem="True" Height="30"/>
+                            <Label Grid.Row="6" Grid.Column="2" Content="Graph App ID:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <Image Grid.Row="6" Grid.Column="1"  x:Name="IMG_Settings_Graph" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Images/Azure.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <TextBox Grid.Row="6" Grid.Column="3" x:Name="txt_Settings_GraphAppID" Height="30" Padding="5" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="" />
+                            <Label Grid.Row="7" Grid.Column="2" Content="Redirect URI:" FontStyle="Normal" VerticalAlignment="Center" Height="28"/>
+                            <Image Grid.Row="7" Grid.Column="1"  x:Name="IMG_Settings_Redirect" Source="/MyApplication;component/Scripts/M365InventoryAutomaton/Resources/Images/Azure.png"  HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="28"/>
+                            <TextBox Grid.Row="7" Grid.Column="3" x:Name="txt_Settings_GraphRedirectUri" Height="30" Padding="5" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" TextWrapping="Wrap" Text="urn:ReportingAPIAccess" />
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
