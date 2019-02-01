@@ -6,28 +6,28 @@ This tool is meant to give a graphical interface to a variety of powershell scri
 The following items are required for the tool to function
 
 ### Modules
-1. Azure RM module
-2. Sharepoint management shell: https://www.microsoft.com/en-us/download/details.aspx?id=35588
-3. Azure AD Module: Install-Module AzureAD
-4. MS Online module: Install-Module MSOnline 
-5. Sharepoint Online module: Install-Module Microsoft.Online.SharePoint.PowerShell
-6. Microsoft Teams Module: Install-Module MicrosoftTeams 
+1. **Azure RM module**
+2. **Sharepoint management shell**: https://www.microsoft.com/en-us/download/details.aspx?id=35588
+3. **Azure AD Module**: Install-Module AzureAD
+4. **MS Online module**: Install-Module MSOnline 
+5. **Sharepoint Online module**: Install-Module Microsoft.Online.SharePoint.PowerShell
+6. **Microsoft Teams Module**: Install-Module MicrosoftTeams 
 
 ### Graph API
 In order to retrieve Graph reports, a graph api application is needed:
-1. Login to Portal.Azure.Com
-2. Navigate to "Azure Active Directory" > "App Registrations"
-3. Click "New Application Registration"
-4. Give your application a friendly name, Select application type "native", and enter a redirect URL i the format urn:foo and click create
-5. Click on the App > Required Permissions
-6. Click Add and select the "Microsoft Graph" API
-7. Grant the App the "Read All Usage Reports" permission
-8. Copy the Application ID
-9. Copy the Redirect URI*
+1. Login to **Portal.Azure.Com**
+2. Navigate to **"Azure Active Directory"** > **"App Registrations"**
+3. Click **"New Application Registration"**
+4. Give your application a friendly name, Select **application type "native"**, and enter a **redirect URL** and click create
+5. Click on the **App** > **Required Permissions**
+6. Click Add and select the** "Microsoft Graph"** API
+7. Grant the App the **"Read All Usage Reports"** permission
+8. Copy the **Application ID**
+9. Copy the **Redirect URI***
 
 *Note: The redirect URI does not have to be a valid URI. I typically use "urn:<NameOfApplication>" for this field.
 
-Once the Graphm application has been created, authorization to the tenant must be granted. In order to do this, adapt the following URI:
+Once the Graph application has been created, **authorization to the tenant must be granted**. In order to do this, adapt the following URI:
 
 https://login.microsoftonline.com/common/adminconsent?client_id=<Application Id>&state=12345&redirect_uri=<Redirect URL>
 
