@@ -1521,6 +1521,248 @@ Function get-AzureInventory{
 
 }
 
+Function get-AADDeletedUsers{
+	$AADDeletedUsers_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$AADDeletedUsers_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory deleted user report" -AppendContent
+	
+	# Body
+	try{
+		$users = Get-MsolUser -All -ReturnDeletedUsers | select SignInName, UserPrincipalName, DisplayName, SoftDeletionTimestamp, IsLicensed, @{Name="License"; Expression = {$_.licenses.accountskuid}} 
+				
+		ForEach ($user in $users) { 
+			If (-NOT [System.String]::IsNullOrEmpty($user)) {  
+				$AADDeletedUsers_Observable.Add((
+					New-Object PSObject -Property @{
+						SignInName = $user.SignInName
+						UserPrincipalName = $user.UserPrincipalName
+						DisplayName = $user.DisplayName
+						SoftDeletionTimestamp = $user.SoftDeletionTimestamp
+						IsLicensed = $user.IsLicensed
+						Licenses = $user.License
+					}
+				))   					
+			}
+		}
+				
+		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		
+		# export
+		$AADDeletedUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Deleted User Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+	}		
+}
+
+Function get-AADContacts{
+	$AADContacts_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$AADContacts_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory contacts report" -AppendContent
+	
+	try{
+		$Contacts = Get-Msolcontact -all | select DisplayName, EmailAddress
+				
+		ForEach ($Contact in $Contacts) { 
+			If (-NOT [System.String]::IsNullOrEmpty($Contact)) {  
+				$AADContacts_Observable.Add((
+					New-Object PSObject -Property @{
+						DisplayName = $Contact.DisplayName
+						EmailAddress = $Contact.EmailAddress
+					}
+				))   					
+			}
+		}
+				
+		Update-control -Synchash $synchash -control IMG_Report_AADContacts -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		
+		# Export
+		$AADContacts_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Contacts Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_AADContacts -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+	}
+}
+
+Function get-AADGroups{
+	$AADGroups_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$AADGroups_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory groups report" -AppendContent
+	
+	try{
+		$groups = get-msolGroup | select DisplayName, EmailAddress, GroupType, ValidationStatus
+				
+		ForEach ($group in $groups) { 
+			If (-NOT [System.String]::IsNullOrEmpty($group)) {  
+				$AADGroups_Observable.Add((
+					New-Object PSObject -Property @{
+						GroupType = $group.GroupType
+						DisplayName = $group.DisplayName
+						MailAddress = $group.EmailAddress
+						ValidationStatus = $group.ValidationStatus
+					}
+				))   					
+			}
+		}
+		
+		Update-control -Synchash $synchash -control IMG_Report_AADGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+
+		# Export
+		$AADGroups_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Groups Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_AADGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+	}
+}
+
+Function get-AADDomains{
+	$AADDomains_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$AADDomains_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory Domains report" -AppendContent
+	
+	try{
+		$domains = Get-MsolDomain | select Name, Status, Authentications
+				
+		ForEach ($domain in $Domains) { 
+			If (-NOT [System.String]::IsNullOrEmpty($domain)) {  
+				$AADDomains_Observable.Add((
+					New-Object PSObject -Property @{
+						Name = $domain.Name
+						Status = $domain.Status
+						Authentications = $domain.Authentications
+					}
+				))   					
+			}
+		}
+				
+		Update-control -Synchash $synchash -control IMG_Report_AADDomains -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		
+		# Export
+		$AADDomains_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Domains Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_AADDomains -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+	}		
+}
+
+Function get-ExchangeMailboxes{
+	$ExchangeMailboxes_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$ExchangeMailboxes_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Exchange Online mailboxes report" -AppendContent
+	
+	try{
+		$ExchangeMailboxes = Get-Mailbox | sort DisplayName | select DisplayName, Alias, PrimarySMTPAddress, ArchiveStatus, UsageLocation, WhenMailboxCreated
+		
+		ForEach ($ExchangeMailbox in $ExchangeMailboxes) { 
+			If (-NOT [System.String]::IsNullOrEmpty($ExchangeMailbox)) { 
+				$statistics = Get-MailboxStatistics $ExchangeMailbox.alias -WarningAction:SilentlyContinue| select ItemCount, TotalItemSize, LastLogonTime
+				$ExchangeMailboxes_Observable.Add((
+					New-Object PSObject -Property @{
+						DisplayName = $ExchangeMailbox.DisplayName
+						Alias = $ExchangeMailbox.Alias
+						PrimarySMTPAddress = $ExchangeMailbox.PrimarySMTPAddress
+						ItemCount = $statistics.ItemCount
+						TotalItemSize = $statistics.TotalItemSize
+						ArchiveStatus = $ExchangeMailbox.ArchiveStatus
+						UsageLocation = $ExchangeMailbox.UsageLocation
+						WhenMailboxCreated = $ExchangeMailbox.WhenMailboxCreated
+						LastLogonTime = $statistics.LastLogonTime
+					}
+				))   					
+			}
+		}
+				
+		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		
+		# Export
+		$ExchangeMailboxes_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Mailboxes Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+	}			
+}
+
+Function get-ExchangeArchives{
+	$ExchangeArchives_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$ExchangeArchives_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Exchange Online Archives report" -AppendContent
+	
+	try{
+		$ExchangeArchives = Get-Mailbox -Archive | sort DisplayName | select DisplayName, Alias, PrimarySMTPAddress, ArchiveStatus, UsageLocation, WhenMailboxCreated
+				
+		ForEach ($ExchangeArchive in $ExchangeArchives) { 
+			If (-NOT [System.String]::IsNullOrEmpty($ExchangeArchive)) {
+				$statistics = Get-MailboxStatistics $ExchangeArchive.alias -archive -WarningAction:SilentlyContinue| select ItemCount, TotalItemSize, LastLogonTime
+				$ExchangeArchives_Observable.Add((
+					New-Object PSObject -Property @{
+						DisplayName = $ExchangeArchive.DisplayName
+						Alias = $ExchangeArchive.Alias
+						PrimarySMTPAddress = $ExchangeArchive.PrimarySMTPAddress
+						ItemCount = $statistics.ItemCount
+						TotalItemSize = $statistics.TotalItemSize
+						ArchiveStatus = $ExchangeArchive.ArchiveStatus
+						UsageLocation = $ExchangeArchive.UsageLocation
+						WhenMailboxCreated = $ExchangeArchive.WhenMailboxCreated
+						LastLogonTime = $statistics.LastLogonTime
+					}
+				))   					
+			}
+		}
+
+		Update-control -Synchash $synchash -control IMG_Report_EXOArchives -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		
+		# Export
+		$ExchangeArchives_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Archives Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_EXOArchives -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+	}		
+}
+
+Function get-ExchangeGroups{
+	$ExchangeGroups_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$ExchangeGroups_Observable.Clear()
+			
+	# Reporting
+	$Timestamp = (get-date -Format HH:mm:ss)
+	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Exchange Online Groups report" -AppendContent
+	
+	try{
+		$ExchangeGroups = Get-Group | where{$_.RecipientTypeDetails -ne "RoleGroup"} | sort DisplayName | select DisplayName, RecipientTypeDetails, @{Name="Owner"; Expression = {$_.ManagedBy}}, WindowsEmailAddress
+				
+		ForEach ($ExchangeGroup in $ExchangeGroups) { 
+			If (-NOT [System.String]::IsNullOrEmpty($ExchangeGroup)) {
+				$ExchangeGroups_Observable.Add((
+					New-Object PSObject -Property @{
+						DisplayName = $ExchangeGroup.DisplayName
+						RecipientTypeDetails = $ExchangeGroup.RecipientTypeDetails
+						Owner = $ExchangeGroup.Owner
+						WindowsEmailAddress = $ExchangeGroup.WindowsEmailAddress
+					}
+				))   					
+			}
+		}
+		Update-control -Synchash $synchash -control IMG_Report_EXOGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+
+		# Export
+		$ExchangeGroups_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Groups Report.csv" -NoTypeInformation -Force
+	}catch{
+		Update-control -Synchash $synchash -control IMG_Report_EXOGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"	
+	}		
+}
+
 Function Run-Reports{
 	# Variables
 					$VariableHash.tenantname = $SyncHash.txt_Settings_tenant.text
@@ -1578,7 +1820,28 @@ Function Run-Reports{
 								Update-control -Synchash $synchash -control IMG_Report_Graph -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
 							#region Graph reports
 
-							# Disconnecting exchange
+							# Deleted User reports
+							get-AADDeletedUsers
+
+							# AAD Contact report
+							get-AADContacts
+
+							# AAD Groups
+							get-AADGroups
+
+							# AAD Domains
+							get-AADDomains
+
+							# Exchange mailboxes
+							get-ExchangeMailboxes
+
+							# Exchange Archives
+							get-ExchangeArchives
+
+							# Exchange Groups
+							get-ExchangeGroups
+
+							# Disconnecting exchange (Pesky little session limit...)
 							$Timestamp = (get-date -Format HH:mm:ss)
 							Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Disconnecting Exchange Online" -AppendContent
 							Remove-PSSession $Session
