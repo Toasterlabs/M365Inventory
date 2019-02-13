@@ -484,40 +484,25 @@ Function Update-Control {
         $Control,
         $Property,
         $Value,
-		$logFile,
-        [switch]$AppendContent,
-        [Switch]$Add
+        [switch]$AppendContent
 	)
 
-    # This is kind of a hack, there may be a better way to do this
-    If ($Property -eq "Close") {
-		$syncHash.Window.Dispatcher.invoke([action]{$Hash.Window.Close()},"Normal")
-        Return
+	If($AppendContent){
+		$syncHash.Window.Dispatcher.Invoke(
+			[action]{
+				# Updating Control
+				$timestamp = (get-date -Format HH:mm:ss)
+				$current = $syncHash.$Control.$Property
+				$Value = "$current`n$timestamp - $value"
+				$syncHash.$Control.$Property = $Value
+				$syncHash.$Control.ScrollToEnd()
+			},"Normal")
+	}Else{
+		$syncHash.Window.Dispatcher.Invoke(
+			[action]{
+				$syncHash.$Control.$Property = $Value
+			},"Normal")
 	}
-
-    # This updates the control based on the parameters passed to the function
-    $syncHash.$Control.Dispatcher.Invoke([action]{
-		# This bit is only really meaningful for the TextBox control, which might be useful for logging progress steps
-		If ($PSBoundParameters['AppendContent']) {
-
-			# Updating Control
-			$current = $syncHash.$Control.$Property
-			$Value = "$current`n$value"
-			$syncHash.$Control.$Property = $Value
-			$syncHash.$Control.ScrollToEnd()
-				
-			# Logging to file
-			$Value | Out-File $LogFile -Append -ErrorAction SilentlyContinue
-        }
-            
-		If ($PSBoundParameters['Add']) {
-			$current = $syncHash.$Control.$Property
-            $Value = $current + $Value
-            $syncHash.$Control.$Property = $Value
-		} Else {
-			$syncHash.$Control.$Property = $Value
-		}
-	}, "Normal")
 }
 
 function Validate-Credentials{
@@ -533,60 +518,74 @@ function Validate-Credentials{
 
     try
     {
+		# Reporting Event
+		$message = "Attempting connection..."
+		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+		
         $Global:ErrorActionPreference = 'stop'
         $Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $O365crds -Authentication Basic -AllowRedirection
 		$Global:ValidCreds = $true
-    }
+
+		# Reporting Event
+		$message = "Connection successfull!"
+		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+		    }
     Catch [System.Net.WebException],[System.Exception]
     {
+		# Reporting Event
+		$message = "Failed to establish connection..."
+	    Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	    Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
         $Global:ValidCreds = $false
     }
     Finally
     {
+	# Reporting Event
+	$message = "Hanging up..."
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
     $Global:ErrorActionPreference = 'continue'
     Remove-PSSession $Session -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
     }
 }
 
+Function Launch-Admin{
+	Param(
+		$ScriptToLaunch
+	)
+
+	# Create a new process object that starts PowerShell
+   $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
+   
+   # Specify the current script path and name as a parameter
+   $newProcess.Arguments = $myInvocation.MyCommand.Definition;;
+   
+   # Indicate that the process should be elevated
+   $newProcess.Verb = "runas";
+   
+   # Start the new process
+   [System.Diagnostics.Process]::Start($newProcess);
+   
+   # Exit from the current, unelevated, process
+   exit
+}
+
 Function Close-Window{
-	$Source = -join($VariableHash.IconsDir,"\appbar.warning.png")
-	$Image = New-Object System.Windows.Controls.Image
-	$Image.Source = $Source
-	$Image.Height = [System.Drawing.Image]::FromFile($Source).Height
-	$Image.Width = [System.Drawing.Image]::FromFile($Source).Width
-	$Image.Margin = 5
-					 
-	$TextBlock = New-Object System.Windows.Controls.TextBlock
-	$TextBlock.Text = "Are you certain you wish to close the window?"
-	$TextBlock.Padding = 10
-	$TextBlock.FontFamily = "Verdana"
-	$TextBlock.FontSize = 16
-	$TextBlock.TextWrapping = "Wrap"
-	$TextBlock.Width = 350
-									
-	$StackPanel = New-Object System.Windows.Controls.StackPanel
-	$StackPanel.Orientation = "Horizontal"
-	$StackPanel.Width = 400
-	$StackPanel.AddChild($Image)
-	$StackPanel.AddChild($TextBlock)
-					
-	Invoke-WPFMessageBox -Content $StackPanel -Title "WARNING!" -TitleBackground "Orange" -TitleTextForeground "Black" -TitleFontSize "20" -ButtonType OK-Cancel -WindowHost $SyncHash.Window
+	$SyncHash.Window.Close()
 
-	If($WPFMessageBoxOutput -eq "OK"){
-		$SyncHash.Window.Close()
+	# Cleaning up reporting runspace
+	$Report_Runspace.close()
+	$Report_Runspace.Dispose()
 
-		# Cleaning up reporting runspace
-		$Report_Runspace.close()
-		$Report_Runspace.Dispose()
+	# Cleaning up main runspace
+	$Main_Runspace.close()
+	$Main_Runspace.Dispose()
 
-		# Cleaning up main runspace
-		$Main_Runspace.close()
-		$Main_Runspace.Dispose()
+	# Invoking garbage collection
+	[gc]::Collect()
+	[gc]::WaitForPendingFinalizers()    
 
-		# Invoking garbage collection
-		[gc]::Collect()
-		[gc]::WaitForPendingFinalizers()    
-	}
 }
 
 function Connect-M365{
@@ -612,18 +611,20 @@ function Connect-M365{
 		[SWITCH]$MFA
 	)
 
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Starting connection process" -AppendContent
+	# Reporting event
+	$message = "Starting connection process..."
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 	#region Variables
 	## Emtpy Hashtable for region
 	$global:M365Services = @{}
 
 	## Defining URI based on region
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Defining connection URI" -AppendContent
+	# Reporting event
+	$message = "Defining connection URI based on location"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	Switch($Region){
 			'Germany' {
@@ -665,9 +666,10 @@ function Connect-M365{
 	#endregion
 
 	# Setting Execution Policy
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Setting remote signed execution policy" -AppendContent
+	# Reporting event
+	$message = "Setting remote execution policy"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	Set-ExecutionPolicy RemoteSigned -Force
 
 	#region Connections
@@ -677,9 +679,10 @@ function Connect-M365{
 				Write-Verbose "Connecting to Exchange Online using MFA"
 				Connect-EXOPSSession -UserPrincipalName $Credentials.UserName -ConnectionUri $global:M365Services['ConnectionEndpointUri'] -AzureADAuthorizationEndPointUri $global:M365Services['AzureADAuthorizationEndpointUri']
 			}Else{
-				# Reporting
-				$Timestamp = (get-date -Format HH:mm:ss)
-				Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Connecting to Exchange Online" -AppendContent
+				# Reporting event
+				$message = "Connecting to Exchange Onine"
+				Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+				Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 				# Creating the session
 				$Session365 = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri $global:M365Services['ConnectionEndpointUri'] -Credential $Credentials -Authentication Basic -AllowRedirection
@@ -687,64 +690,71 @@ function Connect-M365{
 				If($Session365){
 					Try{
 						Import-PSSession -Session $Session365 -AllowClobber -DisableNameChecking
-						Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
+						Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
 					}Catch{
-						Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Check_Red.ico"
+						Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
 				}Else{
-					Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Check_Red.ico"
+					Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
 				}
 			}
 		}
 		}
 		# Connect to Azure AD
 		If($AzureAD){
-			# Reporting
-			$Timestamp = (get-date -Format HH:mm:ss)
-			Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Connecting to Azure Active Directory" -AppendContent
+			# Reporting event
+			$message = "Connecting to Azure Active Directory"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 			Try{
 				Connect-AzureAD -Credential $credentials -AzureEnvironmentName $global:M365Services['AzureEnvironment']
-				Update-control -Synchash $synchash -control IMG_Conn_AAD -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_AAD -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
 			}Catch{
-				Update-control -Synchash $synchash -control IMG_Conn_AAD -property Source -value "$($VariableHash.IconsDir)\Check_Red.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_AAD -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
 			}
 		}
 
 		# Connect to MSOL
 		If($MSOL){
-			# Reporting
-			$Timestamp = (get-date -Format HH:mm:ss)
-			Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Connecting to M365" -AppendContent
+			# Reporting event
+			$message = "Connecting to MS Online"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 			Try{
 				Connect-MsolService -Credential $credentials -AzureEnvironment $global:M365Services['AzureEnvironment']
-				Update-control -Synchash $synchash -control IMG_Conn_M365 -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_MSOL -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
 			}Catch{
-				Update-control -Synchash $synchash -control IMG_Conn_M365 -property Source -value "$($VariableHash.IconsDir)\Check_Red.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_MSOL -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
 			}
 			
 		}
 
 		# Connect to SharePoint Online
 		If($SharePointOnline){
-			# Reporting
-			$Timestamp = (get-date -Format HH:mm:ss)
-			Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Connecting to SharePoint Online" -AppendContent
+			# Reporting event
+			$message = "Connecting to SharePoint Online"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 			Try{
 				Import-Module Microsoft.Online.SharePoint.PowerShell -DisableNameChecking
 				$tenantName = ($TenantName).split(".")[0]
 				Connect-SPOService -Url https://$TenantName-admin.sharepoint.com -credential $credentials -Region $global:M365Services['SharePointRegion']
-				Update-control -Synchash $synchash -control IMG_Conn_SPO -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_SPO -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
 			}Catch{
-				Update-control -Synchash $synchash -control IMG_Conn_M365 -property Source -value "$($VariableHash.IconsDir)\Check_Red.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_M365 -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
 			}
 
 		}
 
 		# Connect to Skype for Business Online
 		If($SkypeForBusinessOnline){
-			Write-Verbose "Connecting to Skype Online"
+			# Reporting event
+			$message = "Connecting to Skype for Business Online"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+			
 			Import-Module SkypeOnlineConnector
 			$sfboSession = New-CsOnlineSession -Credential $credentials
 			If($sfboSession){Import-PSSession $sfboSession}
@@ -755,22 +765,119 @@ function Connect-M365{
 			If($MFA){
 				Connect-IPPSSession -UserPrincipalName $Credentials.UserName -ConnectionUri $global:M365Services['SCCConnectionEndpointUri'] -AzureADAuthorizationEndPointUri $global:M365Services['AzureADAuthorizationEndpointUri']
 			}Else{
-				Write-Verbose "Connecting to Security and Compliance Center"
+				# Reporting event
+				$message = "Connecting to Security and Compliance Center"
+				Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+				Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
 				$SccSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri $global:M365Services['SCCConnectionEndpointUri'] -Credential $credentials -Authentication "Basic" -AllowRedirection
 				If($SccSession){Import-PSSession $SccSession -Prefix cc}
 			}
 		}
 	#endregion
-	Update-control -Synchash $synchash -control Prereq_IMG_Connected -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
+	
+}
+
+Function Connect-ProvisioningWebServiceAPI{
+	<#
+		.SYNOPSIS
+			Connects to the Office 365 provisioning web service API.
+
+		.DESCRIPTION
+			Connects to the Office 365 provisioning web service API.
+			
+			If a credential is specified, it will be used to establish a connection with the provisioning
+			web service API.
+			
+			If a credential is not specified, an attempt is made to identify an existing connection to
+			the provisioning web service API.  If an existing connection is identified, the existing
+			connection is used.  If an existing connection is not identified, the user is prompted for
+			credentials so that a new connection can be established.
+
+		.PARAMETER Credential
+			Specifies the credential to use when connecting to the provisioning web service API
+			using Connect-MsolService.
+
+		.EXAMPLE
+			PS> ConnectProvisioningWebServiceAPI
+
+		.EXAMPLE
+			PS> ConnectProvisioningWebServiceAPI -Credential
+			
+		.INPUTS
+			[System.Management.Automation.PsCredential]
+
+		.OUTPUTS
+
+		.NOTES
+
+	#>
+	
+	[CmdletBinding()]
+	param
+	(
+		[Parameter(Mandatory = $False)]
+		[System.Management.Automation.PsCredential]$Credential
+	)
+	
+	# if a credential was supplied, assume a new connection is intended and create a new
+	# connection using specified credential
+	If ($Credential)
+	{
+		If ((!$Credential) -or (!$Credential.Username) -or ($Credential.Password.Length -eq 0))
+		{
+			Write-warning -Message ("Invalid credential.  Please verify the credential and try again.")
+			Exit
+		}
+		
+		# connect to provisioning web service api
+		Write-Verbose -Message "Connecting to the Office 365 provisioning web service API.  Please wait..."
+		Connect-MsolService -Credential $Credential
+		If($? -eq $False){WriteConsoleMessage -Message "Error while connecting to the Office 365 provisioning web service API.  Quiting..." -MessageType "Error";Exit}
+	}
+	Else
+	{
+		Write-Verbose -Message "Attempting to identify an open connection to the Office 365 provisioning web service API.  Please wait..." 
+		$getMsolCompanyInformationResults = Get-MsolCompanyInformation -ErrorAction SilentlyContinue
+		If (!$getMsolCompanyInformationResults)
+		{
+			Write-Verbose -Message "Could not identify an open connection to the Office 365 provisioning web service API." 			If (!$Credential)
+			{
+				$Credential = $Host.UI.PromptForCredential("Enter Credential",
+					"Enter the username and password of an Office 365 administrator account.",
+					"",
+					"userCreds")
+			}
+			If ((!$Credential) -or (!$Credential.Username) -or ($Credential.Password.Length -eq 0))
+			{
+				Write-Verbose -Message ("Invalid credential.  Please verify the credential and try again.")
+				Exit
+			}
+			
+			# connect to provisioning web service api
+			Write-Verbose -Message "Connecting to the Office 365 provisioning web service API.  Please wait..."
+			Connect-MsolService -Credential $Credential
+			If($? -eq $False){WriteConsoleMessage -Message "Error while connecting to the Office 365 provisioning web service API.  Quiting..." -MessageType "Error";Exit}
+			$getMsolCompanyInformationResults = Get-MsolCompanyInformation -ErrorAction SilentlyContinue
+			WriteConsoleMessage -Message ("Connected to Office 365 tenant named: `"{0}`"." -f $getMsolCompanyInformationResults.DisplayName) -MessageType "Information"
+		}
+		Else
+		{
+			Write-Warning -Message ("Connected to Office 365 tenant named: `"{0}`"." -f $getMsolCompanyInformationResults.DisplayName) 
+		}
+	}
+	If (!$Script:Credential) {$Script:Credential = $Credential}
 }
 
 Function Get-SPOInventory{
 
 
 	# Loading Libraries
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Loading Sharepoint SDK Assemblies" -AppendContent
+	# Reporting Event
+	$message = "Loading Sharepoint libraries"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+	
 	foreach ($Assembly in (Dir $variableHash.LibDir -Filter *.dll)) {
 		Write-verbose "$loading $($Assembly.fullname)"
 		[System.Reflection.Assembly]::LoadFrom($Assembly.fullName) | out-null
@@ -779,36 +886,43 @@ Function Get-SPOInventory{
 	# Variables
 	$Databases = @()
 
-
 	# Creating credentials object
 	$secpswd = ConvertTo-SecureString $VariableHash.M365password -AsPlainText -Force
 	$Creds = new-object -typename System.Management.Automation.PSCredential -argumentlist $VariableHash.M365Username,$secpswd
 
 	# Retrieving all licensed and unlicensed users
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving licensed and unlicensed users" -AppendContent
+    # Reporting Event
+	$message = "Retrieving users"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+	
 	$Users = Get-MsolUser -All 
 	$UnLicensedUsers = Get-MsolUser -UnlicensedUsersOnly 
 
 	# Retrieving all SPO sites, including Personal sites
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving all SPO Sites (including personal sites)" -AppendContent
+	# Reporting Event
+	$message = "Retrieving all SPO sites"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
 	$SitesIncludingPersonal = Get-SPOSite -IncludePersonalSite $true -Limit All -Detailed 
 
 	# Adding User to the site collection admins (Fixing an rights error encountered)
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Adding Inventory requests to the site collection admins" -AppendContent
+
+	# Reporting event
+	$message = "Adding Inventory requests to the site collection admins"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	foreach($site in $Sites){ 
 	  Set-SPOUser -Site $site.Url -LoginName $Credentials.UserName -IsSiteCollectionAdmin $true -ErrorAction SilentlyContinue 
 	} 
 
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving all site users" -AppendContent
+	# Reporting event
+	$message = "Retrieving SharePoint Online Sites"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+	
 
 	foreach($site in $Sites){ 
 	  $Users = Get-SPOUser -Site $site.Url -Limit All | Select * -Verbose 
@@ -823,11 +937,12 @@ Function Get-SPOInventory{
 		$Databases += $DB 
 	  } 
 	} 
-	Update-control -Synchash $synchash -control IMG_Report_AllSites -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+	Update-control -Synchash $synchash -control IMG_Report_AllSites -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving all site groups" -AppendContent
+	# Reporting Event
+	$message = "Retrieving all site groups"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 	$Databases = @()
 	foreach($site in $Sites){ 
@@ -850,11 +965,7 @@ Function Get-SPOInventory{
 		$Databases += $DB 
 	  } 
 	} 
-	Update-control -Synchash $synchash -control IMG_Report_AllSiteGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
-
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving Libraries gt 100" -AppendContent
+	Update-control -Synchash $synchash -control IMG_Report_AllSiteGroups -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 
 	$Databases = @()
 	foreach($site in $site){ 
@@ -863,7 +974,7 @@ Function Get-SPOInventory{
 	  $credentials = New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($Creds.UserName , $Creds.Password) 
 	  $ctx.Credentials = $credentials 
  
-	  #Fetch the users in Site Collection 
+	  #Retrieving the users in Site Collection 
 	  $ctx.Load($ctx.Web.Webs) 
 	  $Lists = $ctx.Web.Lists 
 	  $ctx.Load($Lists) 
@@ -902,10 +1013,10 @@ Function Get-SPOInventory{
 	  } 
 	} 
 
-	Update-control -Synchash $synchash -control IMG_Report_SPOLibrariesgt100 -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving libraries gt 0" -AppendContent
+	# Reporting Event
+	$message = "Retrieving libraries"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 	$Databases = @(); 
 	foreach($site in $Sites){ 
@@ -915,7 +1026,7 @@ Function Get-SPOInventory{
 	  $credentials = New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($Creds.UserName , $Creds.Password) 
 	  $ctx.Credentials = $credentials 
  
-	  #Fetch the users in Site Collection 
+	  #Retrieving the users in Site Collection 
 	  $ctx.Load($ctx.Web.Webs) 
 	  $Lists = $ctx.Web.Lists 
 	  $ctx.Load($Lists) 
@@ -959,7 +1070,64 @@ Function Get-SPOInventory{
 		} 
 	  }
 	} 
-	Update-control -Synchash $synchash -control IMG_Report_SPOLibrariesgt0 -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+	Update-control -Synchash $synchash -control IMG_Report_Libraries -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+	#region shared files and Sites
+		# Reporting Event
+		$message = "Retrieving Files and sites viewable by external users"
+		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+		# Configure Site URL and UserÂ 
+		$TenantID = (($VariableHash.tenantname).Split("."))[0]
+		$siteURL = "https://$tenantID.sharepoint.com"Â Â 
+		
+		# client context object and setting the credentialsÂ Â 
+		$Context = New-Object Microsoft.SharePoint.Client.ClientContext($SiteURL)
+		$Context.Credentials = $Credentials
+
+		# Calling Search API - Create the instance of KeywordQuery and set the propertiesÂ 
+		$keywordQuery = New-Object Microsoft.SharePoint.Client.Search.Query.KeywordQuery($Context)
+
+		# Formulate the query
+		$queryText="ViewableByExternalUsers=true"
+		$keywordQuery.QueryText = $queryText
+		$keywordQuery.TrimDuplicates=$false
+		$keywordQuery.SelectProperties.Add("LastModifiedTime")
+		$keywordQuery.SelectProperties.Add("ViewsLifeTime")
+		$keywordQuery.SelectProperties.Add("ModifiedBy")
+		$keywordQuery.SelectProperties.Add("ViewsLifeTimeUniqueUsers")
+		$keywordQuery.SelectProperties.Add("Created")
+		$keywordQuery.SelectProperties.Add("CreatedBy")
+		$keywordQuery.SortList.Add("ViewsLifeTime","Asc")
+
+		#Search API - Create the instance of SearchExecutor and get the resultÂ 
+		$searchExecutor = New-Object Microsoft.SharePoint.Client.Search.Query.SearchExecutor($Context)
+		$results = $searchExecutor.ExecuteQuery($keywordQuery)
+		$Context.ExecuteQuery()
+
+		#CSV file location, to store the resultÂ 
+		$exportlocation = "C:\Temp\ViewableByExternalUsers.csv"
+		foreach($result in $results.Value[0].ResultRows){
+			
+			$SPO_ExternalShared.Add((
+				New-Object PSObject -Property @{
+					Title               = $result.Title
+					Path                = $result.path
+					LifeTimeViews       = $result.viewslifetime
+					LifeTimeUniqueUsers = $result.ViewsLifeTimeUniqueUsers
+					CreatedBy           = $result.CreatedBy
+					Created             = $result.Created
+					ModifiedBy          = $result.ModifiedBy
+					LastModifyTime      = $result.LastModifiedTime
+				}
+				))						
+		}
+		Update-control -Synchash $synchash -control IMG_Report_SPOShared -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	#endregion shared files and Sites
+
+	# Output list of externally shared items
+	$SPO_ExternalShared | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Externally Shared.csv" -NoTypeInformation -Force 
 
 	# Output List of sites
 	$SitesIncludingPersonal | Select * | Export-Csv -Path "$($VariableHash.OutputPath)\SPOSitesIncludingPersonal.csv"
@@ -972,16 +1140,15 @@ Function Get-SPOInventory{
 
 	# Output libraries
 	$Databases | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Librariesgt100.csv" -NoTypeInformation -Force
-	$Databases | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Librariesgt0.csv" -NoTypeInformation -Force 
+	$Databases | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Libraries.csv" -NoTypeInformation -Force 
 }
 
 Function Get-AADInventory{
 
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Retrieving libraries gt 0" -AppendContent
-
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory user report" -AppendContent
+	# Reporting Event
+	$message = "Starting Azure Active Directory User report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 	# Variables
 	$AADUsers_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]    
@@ -1156,7 +1323,7 @@ Function Get-AADInventory{
 	}Catch{
 		# Nothing here yet
 	}
-	Update-control -Synchash $synchash -control IMG_Report_AADUsers -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+	Update-control -Synchash $synchash -control IMG_Report_AADUsers -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 
 	$AADUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - User Report.csv" -NoTypeInformation -Force 
 }
@@ -1224,17 +1391,6 @@ param(
     [string]$File ='c:\temp\O365Reports.xlsx', #Excel file name
     [string]$APIVersion ='beta' #beta or v1.0
 )
-
-if(!$NoExcel){
-    #Create File path if doesn't exist
-    if(!(Test-Path (Split-Path -Path $File))){
-	    New-Item -ItemType directory -Path (Split-Path -Path $File) | out-null
-    }
-    #Excel file check, will DELETE if exists!!!
-    if($file.split('.').count -gt 1){
-        if (test-path $file) { rm $file }   #delete existing file
-    }
-}
 
 $Periods = @('D7','D30','D90','D180')
 $Period = $Period.ToUpper()
@@ -1427,74 +1583,144 @@ if($connect){
     
         #Shorten report name due to Excel limits
         $ReportName = $Report.ToLower()
+		$ReportName = $ReportName.Replace("get","")
     
         if($Results){
             $Results = $Results.replace("ï»¿","") | ConvertFrom-Csv
             if($Results){
-                $Results | add-member –membertype NoteProperty –name 'Office365Report' –Value $ReportName 
                 $objectCollection.Add($($ReportName),$Results)    
             }
             else{
-               $objResults = New-Object –Type PSObject 
-               $objResults | add-member –membertype NoteProperty –name 'Office365Report' –Value $ReportName  
                $objectCollection.Add($($ReportName),$objResults)  
             }
         }    
     }
 }
-if(!$NoExcel){
-    #Excel object
-    $Excel = New-Object -Com Excel.Application
-    $Excel.Visible = $true
-    $Excel.Workbooks.Add(1) | out-null
-    $Workbook = $Excel.Workbooks.Item(1)
-
-    #Modified Export-Excel function from: https://social.technet.microsoft.com/Forums/windows/en-US/abcf63ba-ce01-4e91-8bad-d5c42d2234e9/how-to-write-in-excel-via-powershell?forum=winserverpowershell
-    function Export-Excel {
-	    [cmdletBinding()]
-	    Param(
-		    [Parameter(ValueFromPipeline=$true)]
-		    [string]$junk        )
-	    begin{
-		    $header = $null
-		    $row = 1
-            if($Workbook.WorkSheets.item(1).name -eq "sheet1"){
-                $Worksheet = $Workbook.WorkSheets.item(1)
-            }
-            else{
-                $Worksheet = $Workbook.Worksheets.Add()
-            }
-	    }
-	    process{
-		    if(!$header){
-			    $i = 0
-			    $header = $_ | Get-Member -MemberType NoteProperty | select name
-			    $header | %{$Worksheet.cells.item(1,++$i)=$_.Name}
-		    }
-		    $i = 0
-		    ++$row
-		    foreach($field in $header){
-			    $Worksheet.cells.item($row,++$i)=$($_."$($field.Name)")
-		    }
-	    }
-	    end{
-            $Worksheet.Name = $($_."Office365Report")
-            $Worksheet.Columns.AutoFit() | out-null
-            $Worksheet = $null
-            $header = $null
-	    }
-    }
-
-    #Loop for creating a worksheet for each report
-    Foreach ($item in $objectCollection.Keys | sort -Descending){
-       $objectCollection[$item] | Export-Excel
-    }
-
-    #Save Excel file
-    $Workbook.SaveAs($file)
-}
 
 return $objectCollection
+}
+
+Function Connect-ProvisioningWebServiceAPI{
+	<#
+		.SYNOPSIS
+			Connects to the Office 365 provisioning web service API.
+
+		.DESCRIPTION
+			Connects to the Office 365 provisioning web service API.
+			
+			If a credential is specified, it will be used to establish a connection with the provisioning
+			web service API.
+			
+			If a credential is not specified, an attempt is made to identify an existing connection to
+			the provisioning web service API.  If an existing connection is identified, the existing
+			connection is used.  If an existing connection is not identified, the user is prompted for
+			credentials so that a new connection can be established.
+
+		.PARAMETER Credential
+			Specifies the credential to use when connecting to the provisioning web service API
+			using Connect-MsolService.
+
+		.EXAMPLE
+			PS> ConnectProvisioningWebServiceAPI
+
+		.EXAMPLE
+			PS> ConnectProvisioningWebServiceAPI -Credential
+			
+		.INPUTS
+			[System.Management.Automation.PsCredential]
+
+		.OUTPUTS
+
+		.NOTES
+
+	#>
+	
+	[CmdletBinding()]
+	param
+	(
+		[Parameter(Mandatory = $False)]
+		[System.Management.Automation.PsCredential]$Credential
+	)
+	
+	# if a credential was supplied, assume a new connection is intended and create a new
+	# connection using specified credential
+	If ($Credential)
+	{
+		If ((!$Credential) -or (!$Credential.Username) -or ($Credential.Password.Length -eq 0))
+		{
+			Write-warning -Message ("Invalid credential.  Please verify the credential and try again.")
+			Exit
+		}
+		
+		# connect to provisioning web service api
+		Write-Verbose -Message "Connecting to the Office 365 provisioning web service API.  Please wait..."
+		Connect-MsolService -Credential $Credential
+		If($? -eq $False){WriteConsoleMessage -Message "Error while connecting to the Office 365 provisioning web service API.  Quiting..." -MessageType "Error";Exit}
+	}
+	Else
+	{
+		Write-Verbose -Message "Attempting to identify an open connection to the Office 365 provisioning web service API.  Please wait..." 
+		$getMsolCompanyInformationResults = Get-MsolCompanyInformation -ErrorAction SilentlyContinue
+		If (!$getMsolCompanyInformationResults)
+		{
+			Write-Verbose -Message "Could not identify an open connection to the Office 365 provisioning web service API." 			If (!$Credential)
+			{
+				$Credential = $Host.UI.PromptForCredential("Enter Credential",
+					"Enter the username and password of an Office 365 administrator account.",
+					"",
+					"userCreds")
+			}
+			If ((!$Credential) -or (!$Credential.Username) -or ($Credential.Password.Length -eq 0))
+			{
+				Write-Verbose -Message ("Invalid credential.  Please verify the credential and try again.")
+				Exit
+			}
+			
+			# connect to provisioning web service api
+			Write-Verbose -Message "Connecting to the Office 365 provisioning web service API.  Please wait..."
+			Connect-MsolService -Credential $Credential
+			If($? -eq $False){WriteConsoleMessage -Message "Error while connecting to the Office 365 provisioning web service API.  Quiting..." -MessageType "Error";Exit}
+			$getMsolCompanyInformationResults = Get-MsolCompanyInformation -ErrorAction SilentlyContinue
+			WriteConsoleMessage -Message ("Connected to Office 365 tenant named: `"{0}`"." -f $getMsolCompanyInformationResults.DisplayName) -MessageType "Information"
+		}
+		Else
+		{
+			Write-Warning -Message ("Connected to Office 365 tenant named: `"{0}`"." -f $getMsolCompanyInformationResults.DisplayName) 
+		}
+	}
+	If (!$Script:Credential) {$Script:Credential = $Credential}
+}
+
+Function get-M365LicenseUsage{
+
+	# Reporting Event
+	$message = "Running licensing report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+	Connect-ProvisioningWebServiceAPI -Credential $Credential
+
+	# get Office 365 SKU info
+	WriteConsoleMessage -Message "Getting SKU information.  Please wait..." -MessageType "Information"
+	$getMsolAccountSkuResults = Get-MsolAccountSku
+
+	# iterate through the sku results
+	WriteConsoleMessage -Message "Processing SKU results.  Please wait..." -MessageType "Information"
+	$arrSkuData = @()
+	foreach($sku in $getMsolAccountSkuResults)
+	{
+		$objSkuData = New-Object PSObject
+		Add-Member -InputObject $objSkuData -MemberType NoteProperty -Name "AccountSkuId" -Value $sku.accountskuid
+		Add-Member -InputObject $objSkuData -MemberType NoteProperty -Name "ActiveUnits" -Value $sku.activeunits
+		Add-Member -InputObject $objSkuData -MemberType NoteProperty -Name "ConsumedUnits" -Value $sku.consumedunits
+		Add-Member -InputObject $objSkuData -MemberType NoteProperty -Name "AvailableUnits" -Value ($($sku.activeunits - $sku.consumedunits) | Out-String).Trim()
+		Add-Member -InputObject $objSkuData -MemberType NoteProperty -Name "WarningUnits" -Value $sku.warningunits
+		Add-Member -InputObject $objSkuData -MemberType NoteProperty -Name "SuspendedUnits" -Value $sku.suspendedunits
+		$arrSkuData += $objSkuData
+	}
+	Update-control -Synchash $synchash -control IMG_Report_LicenseUsage -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	
+	$arrSkuData | Export-Csv -Path "$($VariableHash.OutputPath)\M365 - License Usage Report.csv" -NoTypeInformation -Force 
 }
 
 Function get-AzureInventory{
@@ -1502,6 +1728,9 @@ Function get-AzureInventory{
 	# Creating credentials object
 	$secpswd = ConvertTo-SecureString $VariableHash.M365password -AsPlainText -Force
 	$Creds = new-object -typename System.Management.Automation.PSCredential -argumentlist $VariableHash.M365Username,$secpswd
+
+	# Variables
+	$objVirtualMachine = @()
 
 	# Login to Azure RM
 	Login-AzureRmAccount -Credential $Creds
@@ -1513,10 +1742,48 @@ Function get-AzureInventory{
 		# Setting subscription
 		Select-AzureRmSubscription -Subscription $subscription
 
-		# Getting items
-		$AzureResources = Get-AzureRmResource
-		
+		#region Azure VMs
+		$AzureVirtualMachines = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+		$AzureVirtualMachines.Clear()
 
+		Try{
+			# Reporting
+			$Timestamp = (get-date -Format HH:mm:ss)
+			Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Virtual Machine report" -AppendContent
+		
+			$AzureVMS = get-AzureVM | Get-AzureVM | Format-List DeploymentName,Name,Label,VM,InstanceStatus,IpAddress,
+			InstanceStateDetails,PowerState,InstanceErrorCode,InstanceFaultDomain,InstanceName,InstanceUpgradeDomain,
+			InstanceSize,AvailabilitySetName,DNSName,ServiceName,OperationDescription,OperationId,OperationStatus
+
+			Foreach($azureVM in $AzureVMS){
+				If(-NOT [System.String]::IsNullOrEmpty($azureVM)){
+					$AzureVirtualMachines.Add((
+						New-Object PSObject -Property @{
+							Name            = $AzureVM.Name
+							DNSName		    = $AzureVM.DNSName
+							IP              = $AzureVM.IPAddress
+							State           = $AzureVM.PowerState
+							Label           = $AzureVM.Label
+							Size            = $AzureVM.InstanceSize
+							OperationStatus = $AzureVM.OperationStatus
+							OperationDescr  = $AzureVM.OperationDescription
+							AvailabilitySet = $AzureVM.AvailabilitySetName
+							Instance        = $AzureVM.InstanceName
+							InstanceStatus  = $AzureVM.InstanceStatus
+							FaultDomain     = $AzureVM.InstanceFaultDomain
+							UpgradeDomain   = $AzureVM.InstanceUpgradeDomain
+						}
+					))
+				}
+			}
+		}Catch{
+
+		}
+		
+		Update-control -Synchash $synchash -control IMG_Report_AzureVM -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+		
+		$AzureVirtualMachines | Export-Csv -Path "$($VariableHash.OutputPath)\Azure - Virtual Machines.csv" -NoTypeInformation -Force 
+		#endregion Azure VMs
 	}
 
 }
@@ -1525,9 +1792,10 @@ Function get-AADDeletedUsers{
 	$AADDeletedUsers_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$AADDeletedUsers_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory deleted user report" -AppendContent
+	# Reporting Event
+	$message = "Starting Azure Active Directory Deleted users report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	# Body
 	try{
@@ -1548,12 +1816,12 @@ Function get-AADDeletedUsers{
 			}
 		}
 				
-		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# export
 		$AADDeletedUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Deleted User Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}		
 }
 
@@ -1561,9 +1829,10 @@ Function get-AADContacts{
 	$AADContacts_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$AADContacts_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory contacts report" -AppendContent
+	# Reporting Event
+	$message = "Starting Azure Active Directory contacts report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	try{
 		$Contacts = Get-Msolcontact -all | select DisplayName, EmailAddress
@@ -1579,12 +1848,12 @@ Function get-AADContacts{
 			}
 		}
 				
-		Update-control -Synchash $synchash -control IMG_Report_AADContacts -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADContacts -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# Export
 		$AADContacts_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Contacts Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_AADContacts -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADContacts -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}
 }
 
@@ -1592,9 +1861,10 @@ Function get-AADGroups{
 	$AADGroups_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$AADGroups_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory groups report" -AppendContent
+	# Reporting Event
+	$message = "Running Azure Active Directory Groups report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	try{
 		$groups = get-msolGroup | select DisplayName, EmailAddress, GroupType, ValidationStatus
@@ -1612,12 +1882,12 @@ Function get-AADGroups{
 			}
 		}
 		
-		Update-control -Synchash $synchash -control IMG_Report_AADGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADGroups -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 
 		# Export
 		$AADGroups_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Groups Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_AADGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADGroups -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}
 }
 
@@ -1625,9 +1895,10 @@ Function get-AADDomains{
 	$AADDomains_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$AADDomains_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Azure Active Directory Domains report" -AppendContent
+	# Reporting Event
+	$message = "Running Azure Active Directory Domains Report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	try{
 		$domains = Get-MsolDomain | select Name, Status, Authentications
@@ -1644,12 +1915,12 @@ Function get-AADDomains{
 			}
 		}
 				
-		Update-control -Synchash $synchash -control IMG_Report_AADDomains -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADDomains -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# Export
 		$AADDomains_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Domains Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_AADDomains -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADDomains -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}		
 }
 
@@ -1657,12 +1928,13 @@ Function get-ExchangeMailboxes{
 	$ExchangeMailboxes_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$ExchangeMailboxes_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Exchange Online mailboxes report" -AppendContent
+	# Reporting Event
+	$message = "Running Exchange Online mailboxes report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	try{
-		$ExchangeMailboxes = Get-Mailbox | sort DisplayName | select DisplayName, Alias, PrimarySMTPAddress, ArchiveStatus, UsageLocation, WhenMailboxCreated
+		$ExchangeMailboxes = Get-Mailbox | sort DisplayName | select DisplayName, Alias, PrimarySMTPAddress, ArchiveStatus, UsageLocation, WhenMailboxCreated, UserPrincipalName, RecipientTypeDetails, AuditEnabled, IsDirSynced, IsShared
 		
 		ForEach ($ExchangeMailbox in $ExchangeMailboxes) { 
 			If (-NOT [System.String]::IsNullOrEmpty($ExchangeMailbox)) { 
@@ -1677,18 +1949,24 @@ Function get-ExchangeMailboxes{
 						ArchiveStatus = $ExchangeMailbox.ArchiveStatus
 						UsageLocation = $ExchangeMailbox.UsageLocation
 						WhenMailboxCreated = $ExchangeMailbox.WhenMailboxCreated
+						UserPrincipalName = $ExchangeMailbox.UserPrincipalName
+						AuditEnabled = $ExchangeMailbox.AuditEnabled
+						RecipientTypeDetails = $ExchangeMailbox.RecipientTypeDetails
+						IsDirSynced = $ExchangeMailbox.IsDirSynced
+						IsShared = $ExchangeMailbox.IsShared
 						LastLogonTime = $statistics.LastLogonTime
 					}
 				))   					
 			}
 		}
 				
-		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# Export
+		Update-control -Synchash $SyncHash -control DataGrid_EXOMailboxes -property ItemsSource -value $ExchangeMailboxes_Observable
 		$ExchangeMailboxes_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Mailboxes Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}			
 }
 
@@ -1696,9 +1974,10 @@ Function get-ExchangeArchives{
 	$ExchangeArchives_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$ExchangeArchives_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Exchange Online Archives report" -AppendContent
+	# Reporting Event
+	$message = "Running Exchange Online Archives report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	try{
 		$ExchangeArchives = Get-Mailbox -Archive | sort DisplayName | select DisplayName, Alias, PrimarySMTPAddress, ArchiveStatus, UsageLocation, WhenMailboxCreated
@@ -1722,12 +2001,12 @@ Function get-ExchangeArchives{
 			}
 		}
 
-		Update-control -Synchash $synchash -control IMG_Report_EXOArchives -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_EXOArchives -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# Export
 		$ExchangeArchives_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Archives Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_EXOArchives -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"
+		Update-control -Synchash $synchash -control IMG_Report_EXOArchives -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}		
 }
 
@@ -1735,9 +2014,10 @@ Function get-ExchangeGroups{
 	$ExchangeGroups_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
 	$ExchangeGroups_Observable.Clear()
 			
-	# Reporting
-	$Timestamp = (get-date -Format HH:mm:ss)
-	Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Exchange Online Groups report" -AppendContent
+	# Reporting Event
+	$message = "Running Exchange Online Groups report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
 	try{
 		$ExchangeGroups = Get-Group | where{$_.RecipientTypeDetails -ne "RoleGroup"} | sort DisplayName | select DisplayName, RecipientTypeDetails, @{Name="Owner"; Expression = {$_.ManagedBy}}, WindowsEmailAddress
@@ -1754,129 +2034,662 @@ Function get-ExchangeGroups{
 				))   					
 			}
 		}
-		Update-control -Synchash $synchash -control IMG_Report_EXOGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_EXOGroups -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 
 		# Export
 		$ExchangeGroups_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Groups Report.csv" -NoTypeInformation -Force
 	}catch{
-		Update-control -Synchash $synchash -control IMG_Report_EXOGroups -property Source -Value "$($VariableHash.IconsDir)\Check_Red.ico"	
+		Update-control -Synchash $synchash -control IMG_Report_EXOGroups -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"	
 	}		
 }
 
+Function get-ExternalUsers{
+	# Reporting Event
+	$message = "Running External users report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+	$ExternalUsers = Get-MsolUser -All | ? {$_.UserType -eq "Guest"} | Select DisplayName,SignInName | FT
+
+	Foreach($user in $users){
+		$ExternalUsers_Observable.Add((
+			New-Object PSObject -Property @{
+				DisplayName = $user.DisplayName
+				SignInName = $user.SignInName
+			}
+		))   					
+	}
+
+	Update-control -Synchash $synchash -control IMG_Report_ExternalUsers -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+	# Export
+	$ExternalUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - External users.csv" -NoTypeInformation -Force
+}
+
+function Get-Flows{
+	# Reporting Event
+	$message = "Running Microsoft Flow report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+	$Username = $variablehash.M365username
+	$password = $variablehash.M365password
+	$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
+	clear-variable password
+	Add-PowerAppsAccount -Username $Username -Password $SecurePass
+
+	$flows = get-flow | select DisplayName, Enabled
+
+	Foreach ($flow in $flows){
+		$Flows_Observable.Add((
+			New-Object PSObject -Property @{
+				DisplayName = $flow.DisplayName
+				Enabled = $flow.Enabled
+			}
+		))   			
+	}
+
+	$AdminFlows = Get-AdminFlow
+
+	Foreach ($adminflow in $AdminFlows){
+		$Flows_Observable.Add((
+			New-Object PSObject -Property @{
+				DisplayName = $adminflow.DisplayName
+				Enabled = $adminflow.Enabled
+			}
+		))   			
+	}
+
+	Update-control -Synchash $synchash -control IMG_Report_Flow -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+	# Export
+	$ExternalUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\Microsoft Flow.csv" -NoTypeInformation -Force
+}
+
+Function get-powerapps{
+	# Reporting Event
+	$message = "Running Microsoft PowerApps report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+	$Username = $variablehash.M365username
+	$password = $variablehash.M365password
+	$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
+	clear-variable password
+	Add-PowerAppsAccount -Username $Username -Password $SecurePass
+
+	$powerapps = get-adminpowerapp
+
+	foreach($app in $powerapps){
+		$Apps_Observable.Add((
+			New-Object PSObject -Property @{
+				DisplayName    = $app.Internal.Properties.DisplayName
+				Description    = $app.Internal.Properties.Description
+				CreatedBy      = $app.Internal.Properties.CreatedBy.userPrincipalName
+				SharedGroups   = $app.Internal.Properties.sharedGroupsCount
+				SharedAccounts = $app.Internal.Properties.sharedUsersCount
+				FeaturedApp    = $app.Internal.Properties.isFeaturedApp
+				ConsentBypass  = $app.Internal.Properties.bypassConsent
+				WebLink        = $app.Internal.Properties.appPackageDetails.webPackage.value
+
+
+			}
+		))   			
+	}
+
+	Update-control -Synchash $synchash -control IMG_Report_PowerApps -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+	# Export
+	$Apps_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\Microsoft Powerapps.csv" -NoTypeInformation -Force
+}
+
+Function get-PowerBIWorkspaces{
+	# Reporting Event
+	$message = "Running Microsoft PowerBI Workspaces report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+	$Username = $variablehash.M365username
+	$password = $variablehash.M365password
+	$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
+	$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Username,$SecurePass
+	clear-variable password
+
+	# Connecting
+	connect-PowerBIServiceAccount -credential $credentials
+
+	#region Retrieving all workspaces
+	$workspaces = Get-PowerBIWorkspace -Scope Organization -All
+
+	Foreach($workspace in $workspaces){
+		$PowerBI_Workspaces.Add((
+			New-Object PSObject -Property @{
+				Name              = $workspace.Name
+				Type              = $workspace.Type
+				State             = $workspace.State
+				ReadOnly          = $workspace.IsReadOnly
+				Orphaned          = $workspace.IsOrphaned
+				DedicatedCapacity = $workspace.IsOnDedicatedCapacity
+				Users             = $workspace.Users
+			}
+		))   	
+	}
+
+	Update-control -Synchash $synchash -control IMG_Report_PowerBIWorkspaces -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	#endregion
+
+	#region dashboards
+		# Reporting Event
+		$message = "Running Microsoft PowerBI Dashboards report"
+		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+		$dashboards = Get-PowerBIDashboard -Scope Organization
+
+		foreach($dash in $dashboards){
+			$PowerBI_DashBoards.Add((
+				New-Object PSObject -Property @{
+					Name       = $dash.Name
+					ReadOnly   = $dash.IsReadOnly
+					ID         = $dash.Id
+				}
+			))   	
+		}
+	
+		Update-control -Synchash $synchash -control IMG_Report_PowerBIDashboards -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	#endregion
+
+	#region reports
+		# Reporting Event
+		$message = "Running Microsoft PowerBI reports report"
+		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+		$reports = Get-PowerBIDashboard -Scope Organization
+
+		foreach($report in $reports){
+			$PowerBI_Reports.Add((
+				New-Object PSObject -Property @{
+					Name       = $report.Name
+					ID         = $report.Id
+					DataSetID  = $reports.DataSetID
+					WebURL     = $report.WebURL
+				}
+			))   	
+		}
+	
+		Update-control -Synchash $synchash -control IMG_Report_PowerBIDashboards -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	#endregion
+
+	#region Datasources
+		# Reporting Event
+		$message = "Running Microsoft PowerBI datasources report"
+		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+		$Datasets = Get-PowerBIDataset -Scope Organization
+
+		Foreach($Set in $datasets){
+			$PowerBI_Datasets.Add((
+				New-Object PSObject -Property @{
+					Name                           = $Set.Name
+					ConfiguredBy                   = $Set.ConfiguredBy
+					RetentionPolicy                = $Set.DefaultRetentionPolicy
+					AddRowsAPI                     = $Set.AddRowsApiEnabled
+					Tables                         = $Set.Tables
+					WebURL                         = $Set.WebUrl
+					Relationships                  = $Set.Relationships
+					Datasources                    = $Set.Datasources
+					DefaultMode                    = $Set.DefaultMode
+					Refreshable                    = $Set.IsRefreshable
+					EffectiveIdentityRequired      = $Set.IsEffectiveIdentityRequired
+					EffectiveIdentityRolesRequired = $Set.IsEffectiveIdentityRolesRequired
+					OnPremGatewayRequired          = $Set.IsOnPremGatewayRequired
+				}
+			))   	
+		}
+
+		Update-control -Synchash $synchash -control IMG_Report_PowerBIDatasources -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+	#endregion
+
+	# Export
+	$PowerBI_Workspaces | Export-Csv -Path "$($VariableHash.OutputPath)\PowerBI - Workspaces.csv" -NoTypeInformation -Force
+	$PowerBI_DashBoards | Export-Csv -Path "$($VariableHash.OutputPath)\PowerBI - Dashboards.csv" -NoTypeInformation -Force
+	$PowerBI_Reports | Export-Csv -Path "$($VariableHash.OutputPath)\PowerBI - Reports.csv" -NoTypeInformation -Force
+	$PowerBI_Datasets | Export-Csv -Path "$($VariableHash.OutputPath)\PowerBI - DataSets.csv" -NoTypeInformation -Force
+}
+
 Function Run-Reports{
+	# Reporting Event
+	$message = "Grabbing information"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
 	# Variables
-					$VariableHash.tenantname = $SyncHash.txt_Settings_tenant.text
-					$VariableHash.GraphAppID = $syncHash.txt_Settings_GraphAppID.Text
-					$VariableHash.GraphRedirectUri = $syncHash.txt_Settings_GraphRedirectUri.Text
-					$VariableHash.TenantRegion = $SyncHash.CB_Settings_TenantRegion.CurrentItem
-					If($VariableHash.TenantRegion -like ""){
-							$VariableHash.TenantRegion = "Default"
-						}
+	$VariableHash.tenantname = $SyncHash.txt_Home_Tenant.text
+	$VariableHash.GraphAppID = $syncHash.txt_Home_GraphAppID.Text
+	$VariableHash.TenantRegion = $SyncHash.DD_Home_Region.CurrentItem
+	$VariableHash.M365username = $synchash.txt_Home_Username.Text
+	$VariableHash.M365password = $synchash.txt_Home_Password.Password
+	
+	If($VariableHash.TenantRegion -like ""){
+		$VariableHash.TenantRegion = "Default"
+	}
 
-					$Report_Runspace =[runspacefactory]::CreateRunspace()
-					$Report_Runspace.ApartmentState = "STA"
-					$Report_Runspace.ThreadOptions = "ReuseThread"
-					$Report_Runspace.Open()
+	$Report_Runspace =[runspacefactory]::CreateRunspace()
+	$SyncHash.ReportRunspace = $Report_Runspace
+	$Report_Runspace.ApartmentState = "STA"
+	$Report_Runspace.ThreadOptions = "ReuseThread"
+	$Report_Runspace.Open()
 
-					# Passing variables
-					$Report_Runspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
-					$Report_Runspace.SessionStateProxy.SetVariable("VariableHash",$VariableHash)
+	# Passing variables
+	$Report_Runspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+	$Report_Runspace.SessionStateProxy.SetVariable("VariableHash",$VariableHash)
 					
-					# Create powershell object which will containt the code we're running in the runspace
-					$psCmd = [PowerShell]::Create()
+	# Create powershell object which will containt the code we're running in the runspace
+	$psCmd = [PowerShell]::Create()
 
-					# Add runspace to Powershell object
-					$psCmd.Runspace = $Report_Runspace
+	# Add runspace to Powershell object
+	$psCmd.Runspace = $Report_Runspace
 
-					[Void]$psCmd.AddScript({
-						# Importing module
-						Import-Module "$($VariableHash.ModuleDir)M365InventoryAutomaton.psm1" -Force -DisableNameChecking
+	[Void]$psCmd.AddScript({
+		# Importing module
+		Import-Module "$($VariableHash.ModuleDir)M365InventoryAutomaton.psm1" -Force -DisableNameChecking
 
-						If($VariableHash.M365Username){
-							Update-control -synchash $synchash -control IMG_Wizard -property Source -Value "$($VariableHash.ImageDir)\wizard_redeyes.png"
+		If($VariableHash.M365Username){
 
-							# Creating credentials object
-							$secpswd = ConvertTo-SecureString $VariableHash.M365password -AsPlainText -Force
-							$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $VariableHash.M365Username,$secpswd
+		
+			# Creating credentials object
+			$secpswd = ConvertTo-SecureString $VariableHash.M365password -AsPlainText -Force
+			$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $VariableHash.M365Username,$secpswd
 
-							# Calling connection function
-							Connect-M365 -Credentials $credentials -Region $VariableHash.TenantRegion -TenantName $VariableHash.tenantname -ExchangeOnline -AzureAD -MSOL -SharePointOnline
+			# Calling connection function
+			Connect-M365 -Credentials $credentials -Region $VariableHash.TenantRegion -TenantName $VariableHash.tenantname -ExchangeOnline -AzureAD -MSOL -SharePointOnline
 
-							# Azure Active Directory User Report
-							get-AADInventory
+			# Azure Active Directory User Report
+			get-AADInventory
 
-							# SPO site inventories
-							get-SPOInventory
+			# SPO site inventories
+			get-SPOInventory
 
-							#region Graph reports
-								$Timestamp = (get-date -Format HH:mm:ss)
-								Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Running Microsoft Graph reports" -AppendContent
-								$Graphreports = get-O365UsageReports -AzureAppClientId $variableHash.GraphAppID -Credential $credentials -Period D180 -NoExcel
+			#region Graph reports
+			# Reporting Event
+			$message = "Running Graph reports"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+			
+			$Graphreports = get-O365UsageReports -AzureAppClientId $variableHash.GraphAppID -Credential $credentials -Period D180 -NoExcel
 
-								Foreach($item in $Graphreports.keys){
-									$Graphreports[$item] | Export-Csv -Path "$($VariableHash.OutputPath)\Graph - $item.csv" -NoTypeInformation
-								}
+			Foreach($item in $Graphreports.keys){
+				$Graphreports[$item] | Export-Csv -Path "$($VariableHash.OutputPath)\Graph - $item.csv" -NoTypeInformation
+			}
 
-								Update-control -Synchash $synchash -control IMG_Report_Graph -property Source -value "$($VariableHash.IconsDir)\Check_Green.ico"
-							#region Graph reports
+			Update-control -Synchash $synchash -control IMG_Report_Graph -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
+			#endregion Graph reports
 
-							# Deleted User reports
-							get-AADDeletedUsers
+			# Deleted User reports
+			get-AADDeletedUsers
 
-							# AAD Contact report
-							get-AADContacts
+			# AAD Contact report
+			get-AADContacts
 
-							# AAD Groups
-							get-AADGroups
+			# AAD Groups
+			get-AADGroups
 
-							# AAD Domains
-							get-AADDomains
+			# AAD Domains
+			get-AADDomains
 
-							# Exchange mailboxes
-							get-ExchangeMailboxes
+			# Exchange mailboxes
+			get-ExchangeMailboxes
 
-							# Exchange Archives
-							get-ExchangeArchives
+			# Exchange Archives
+			get-ExchangeArchives
 
-							# Exchange Groups
-							get-ExchangeGroups
+			# Exchange Groups
+			get-ExchangeGroups
 
-							# Disconnecting exchange (Pesky little session limit...)
-							$Timestamp = (get-date -Format HH:mm:ss)
-							Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Disconnecting Exchange Online" -AppendContent
-							Remove-PSSession $Session
-							Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Check_Waiting.ico"
+			# License usage report
+			get-M365LicenseUsage
+
+			# Azure Inventory
+			get-AzureInventory
+
+			# Flows
+			get-flows
+
+			# Ppowerapps
+			get-powerapps
+
+			# PowerBI Workpaces
+			get-PowerBIWorkspaces
+
+			# Disconnecting exchange (Pesky little session limit...)
+			
+			# Reporting event
+			$message = "Disconnecting Connections"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+	
+			Remove-PSSession $Session
+			Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Check_Waiting.ico"
 						
-							# Reporting finished
-							$Timestamp = (get-date -Format HH:mm:ss)
-							Update-control -Synchash $synchash -control txt_output -property Text -value "[$timestamp] - Report run completed" -AppendContent
-							Update-control -synchash $synchash -control IMG_Wizard -property Source -Value "$($VariableHash.ImageDir)\wizard.png"
-						}Else{
-							$Source = -join($VariableHash.IconsDir,"\appbar.warning.png")
-							$Image = New-Object System.Windows.Controls.Image
-							$Image.Source = $Source
-							$Image.Height = [System.Drawing.Image]::FromFile($Source).Height
-							$Image.Width = [System.Drawing.Image]::FromFile($Source).Width
-							$Image.Margin = 5
+			# Reporting event
+			$message = "Report run completed"
+			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+	
+		}Else{
+			$Source = -join($VariableHash.IconsDir,"\appbar.warning.png")
+			$Image = New-Object System.Windows.Controls.Image
+			$Image.Source = $Source
+			$Image.Height = [System.Drawing.Image]::FromFile($Source).Height
+			$Image.Width = [System.Drawing.Image]::FromFile($Source).Width
+			$Image.Margin = 5
 					 
-							$TextBlock = New-Object System.Windows.Controls.TextBlock
-							$TextBlock.Text = "Please validate credentials before starting inventory!"
-							$TextBlock.Padding = 10
-							$TextBlock.FontFamily = "Verdana"
-							$TextBlock.FontSize = 16
-							$TextBlock.TextWrapping = "Wrap"
-							$TextBlock.Width = 350
+			$TextBlock = New-Object System.Windows.Controls.TextBlock
+			$TextBlock.Text = "Please validate credentials before starting inventory!"
+			$TextBlock.Padding = 10
+			$TextBlock.FontFamily = "Verdana"
+			$TextBlock.FontSize = 16
+			$TextBlock.TextWrapping = "Wrap"
+			$TextBlock.Width = 350
 									
-							$StackPanel = New-Object System.Windows.Controls.StackPanel
-							$StackPanel.Orientation = "Horizontal"
-							$StackPanel.Width = 400
-							$StackPanel.AddChild($Image)
-							$StackPanel.AddChild($TextBlock)
+			$StackPanel = New-Object System.Windows.Controls.StackPanel
+			$StackPanel.Orientation = "Horizontal"
+			$StackPanel.Width = 400
+			$StackPanel.AddChild($Image)
+			$StackPanel.AddChild($TextBlock)
 					
-							Invoke-WPFMessageBox -Content $StackPanel -Title "WARNING!" -TitleBackground "Orange" -TitleTextForeground "Black" -TitleFontSize "20" -ButtonType OK -WindowHost $SyncHash.Window
-						}
-					})
+			Invoke-WPFMessageBox -Content $StackPanel -Title "WARNING!" -TitleBackground "Orange" -TitleTextForeground "Black" -TitleFontSize "20" -ButtonType OK -WindowHost $SyncHash.Window
+		}
+	})
 
-					# Begin!
-					$data = $psCmd.BeginInvoke()
+	# Begin!
+	$data = $psCmd.BeginInvoke()
+}
+
+Function Prereq-Failures{
+	$Source = -join($VariableHash.IconsDir,"\appbar.warning.png")
+	$Image = New-Object System.Windows.Controls.Image
+	$Image.Source = $Source
+	$Image.Height = [System.Drawing.Image]::FromFile($Source).Height
+	$Image.Width = [System.Drawing.Image]::FromFile($Source).Width
+	$Image.Margin = 5
+					 
+	$TextBlock = New-Object System.Windows.Controls.TextBlock
+	$TextBlock.Text = "Prerequisite failures detected!`nPlease correct these error and relaunch the tooling!"
+	$TextBlock.Padding = 10
+	$TextBlock.FontFamily = "Verdana"
+	$TextBlock.FontSize = 16
+	$TextBlock.TextWrapping = "Wrap"
+	$TextBlock.Width = 350
+	$TextBlock.VerticalContentAlignment = "Center"
+									
+	$StackPanel = New-Object System.Windows.Controls.StackPanel
+	$StackPanel.Orientation = "Horizontal"
+	$StackPanel.Width = 400
+	$StackPanel.AddChild($Image)
+	$StackPanel.AddChild($TextBlock)
+					
+	Invoke-WPFMessageBox -Content $StackPanel -Title "WARNING!" -TitleBackground "Orange" -TitleTextForeground "Black" -TitleFontSize "20" -ButtonType OK
+}
+
+Function Prereq-Testing{
+	#region IsAdmin testing
+					
+	Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Testing user context..."
+	# Retrieving Windows Security Principal
+	$ThisPrincipal = new-object System.Security.principal.windowsprincipal( [System.Security.Principal.WindowsIdentity]::GetCurrent())
+						
+	# Checking if the user in in the Administrator Role
+	$IsAdmin = $ThisPrincipal.IsInRole("Administrators")
+
+	If($IsAdmin){
+		Update-control -Synchash $PrereqHash -control IMG_Prereq_Admin -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
+	}Else{
+		Update-control -Synchash $PrereqHash -control IMG_Prereq_Admin -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
+		$PrereqHash.PrereqFailed = $true
+		$PrereqHash.RunAsAdmin = "Failed"
+	}
+	#endregion IsAdmin testing
+
+	#region Connectivity Check	
+	Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Testing internet connectivity state..."
+	
+	# getting internet connectivity state
+	$HasInternetAccess = ([Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]'{DCB00C01-570F-4A9B-8D69-199FDBA5723B}')).IsConnectedToInternet)
+
+	If($HasInternetAccess){
+		Update-control -Synchash $PrereqHash -control IMG_Prereq_Internet -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
+	}Else{
+		Update-control -Synchash $PrereqHash -control IMG_Prereq_Internet -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
+		$PrereqHash.PrereqFailed = $true
+		$PrereqHash.InternetAccess = "Failed"
+	}
+	#endregion Connectivity Check
+
+				#region Sharepoint Online module
+					
+					Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Testing for SharePoint Online Powershell Module..."
+
+					If((Get-ChildItem -Path 'C:\Program Files\WindowsPowerShell\Modules\Microsoft.Online.SharePoint.PowerShell\' -Recurse -Filter "Microsoft.Online.SharePoint.PowerShell.psd1")){
+						Update-control -Synchash $PrereqHash -control IMG_Prereq_SPOMgmtShell -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
+					}Else{
+						Update-control -Synchash $PrereqHash -control IMG_Prereq_SPOMgmtShell -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
+						$PrereqHash.PrereqFailed = $true
+						$PrereqHash.SPOModule = "Failed"
+					}
+				#endregion Sharepoint Online module
+
+				#region Azure Online module
+					
+					Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Testing for Azure Active Directory Module..."
+
+					If((Get-ChildItem -Path 'C:\Program Files\WindowsPowerShell\Modules\AzureAD\' -Recurse -Filter "AzureAD.psd1")){
+						Update-control -Synchash $PrereqHash -control IMG_Prereq_AADModule -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
+					}Else{
+						Update-control -Synchash $PrereqHash -control IMG_Prereq_AADModule -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
+						$PrereqHash.PrereqFailed = $true
+						$PrereqHash.AADModule = "Failed"
+					}
+				#endregion Azure Online module
+
+				#region MSTeams Online module
+					
+					Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Testing for Microsoft Teams Module..."
+
+					If((get-childitem -path 'C:\Program Files\WindowsPowerShell\Modules\MicrosoftTeams' -Recurse -Filter "MicrosoftTeams.psd1")){
+						Update-control -Synchash $PrereqHash -control IMG_Prereq_MSTeamsModule -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
+					}Else{
+						Update-control -Synchash $PrereqHash -control IMG_Prereq_MSTeamsModule -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
+						$PrereqHash.PrereqFailed = $true
+						$PrereqHash.TeamsModule = "Failed"
+					}
+				#endregion MSTeams Online module
+
+				# Warn
+				If($PrereqHash.PrereqFailed -like $true){
+					Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Prerequisites failure(s) detected!"
+					Prereq-Failures
+				}Else{
+					Update-control -Synchash $PrereqHash -control Lbl_Output -property Content -value "Prerequisites tested successfully"
+				}
+}
+
+function Invoke-ColorOutput{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$False,Position=1,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)]
+		[alias('message')]
+		[alias('msg')]
+		[Object]$Object,
+        [Parameter(Mandatory=$False,Position=2,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)]
+		[ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')]
+		[alias('fore')]
+		[ConsoleColor] $ForegroundColor,
+        [Parameter(Mandatory=$False,Position=3,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)]
+		[ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')]
+		[alias('back')]
+		[alias('BGR')]
+		[ConsoleColor] $BackgroundColor,
+        [Switch]$NoNewline
+    )    
+
+    # Save previous colors
+    $previousForegroundColor = $host.UI.RawUI.ForegroundColor
+    $previousBackgroundColor = $host.UI.RawUI.BackgroundColor
+
+    # Set BackgroundColor if available
+    if($BackgroundColor -ne $null)
+    { 
+       $host.UI.RawUI.BackgroundColor = $BackgroundColor
+    }
+
+    # Set $ForegroundColor if available
+    if($ForegroundColor -ne $null)
+    {
+        $host.UI.RawUI.ForegroundColor = $ForegroundColor
+    }
+
+    # Always write (if we want just a NewLine)
+    if($Object -eq $null)
+    {
+        $Object = ""
+    }
+
+    if($NoNewline)
+    {
+        [Console]::Write($Object)
+    }
+    else
+    {
+        Write-Output $Object
+    }
+
+    # Restore previous colors
+    $host.UI.RawUI.ForegroundColor = $previousForegroundColor
+    $host.UI.RawUI.BackgroundColor = $previousBackgroundColor
+}
+
+Function Invoke-Logging{
+    Param(
+        [Parameter(Mandatory=$True)]
+        [STRING]$Message,
+		[Parameter(Mandatory=$True)]
+		[Validateset('TEXT','TITLE','STATUS','AUDIT','INFO','SUCCESS','ALERT','WARNING','ERROR','CRITICAL','VERBOSE','DEBUG')]
+		[STRING]$LogLevel,
+        [Parameter(Mandatory=$False)]
+        [System.IO.FileInfo]$RunLog
+	)
+
+		Switch($LogLevel){
+			"TEXT"     {
+				Invoke-ColorOutput $Message -ForegroundColor White
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"TITLE"    {
+				Invoke-ColorOutput $Message -ForegroundColor Green
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"STATUS"   {
+				$Message = (get-date -Format HH:mm:ss) + " - [STATUS]: " + $Message
+				Invoke-ColorOutput $Message -ForegroundColor Magenta
+				Update-Control -syncHash $synchash -Control TXT_output -Property TEXT -Value $Message -AppendContent
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"AUDIT"    {
+				$Message = (get-date -Format HH:mm:ss) + " - [AUDIT]: " + $Message 
+				Update-Control -syncHash $synchash -Control TXT_output -Property TEXT -Value $Message -AppendContent
+				Invoke-ColorOutput $Message -ForegroundColor DarkGrey
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch
+				{<#No Error Handling... This is horrible!#>
+				}
+			}
+			"INFO"     {
+				$Message = (get-date -Format HH:mm:ss) + " - [INFO]: " + $Message 
+				Invoke-ColorOutput $Message -ForegroundColor White
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"SUCCESS"     {
+				$Message = (get-date -Format HH:mm:ss) + " - [SUCCESS]: " + $Message 
+				Invoke-ColorOutput $Message -ForegroundColor Green
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"ALERT"    {
+				$Message = (get-date -Format HH:mm:ss) + " - [ALERT]: " + $Message
+				Write-Host $Message -ForegroundColor Yellow
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"NEWLINE"  {Write-Host "";try{Write-Output "`n" | Out-File $RunLog -Append -ErrorAction SilentlyContinue}Catch{}}
+			"WARNING"  {
+				Write-Warning -Message $Message
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"ERROR"    {
+				Write-Error -Message $Message
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"CRITICAL" {
+				$Message = (get-date -Format HH:mm:ss) + " - [CRITICAL]: " + $Message
+				Invoke-colorOutput $Message -ForegroundColor White -BGR Red
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"VERBOSE" {
+				$Message = (get-date -Format HH:mm:ss) + " - [VERBOSE]: " + $Message
+				Write-Verbose -Message $Message
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+			"DEBUG" {
+				$Message = (get-date -Format HH:mm:ss) + " - [DEBUG]: " + $Message
+				Invoke-colorOutput $Message -ForegroundColor White -BGR Cyan
+				Try{
+					$Message | Out-File $RunLog -Append -ErrorAction SilentlyContinue
+				}Catch{
+					<#No Error Handling... This is horrible!#>
+				}
+			}
+		}
 }
