@@ -15,6 +15,7 @@ The following items are required for the tool to function
 7. **PowerApps Modules**" Install-Module -Name Microsoft.PowerApps.Administration.PowerShell & Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber
 8. **PowerApps Plan 2 license or trial license**: This is required for the powerapps/flow admin actions
 9. **Office 365 Global Administrator**: Due to the extent of actions we take, a lot of items that are touched will require global admin permissions.
+10. **PowerBi Module**: Install-Module -Name MicrosoftPowerBIMgmt
 
 ### Graph API
 In order to retrieve Graph reports, a graph api application is needed:
