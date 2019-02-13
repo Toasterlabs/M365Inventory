@@ -2,12 +2,16 @@
 The following items are required for the tool to function
 
 ## Modules
-1. Azure RM module
-2. Sharepoint management shell: https://www.microsoft.com/en-us/download/details.aspx?id=35588
-3. Azure AD Module: Install-Module AzureAD
-4. MS Online module: Install-Module MSOnline
-5. Sharepoint Online module: Install-Module Microsoft.Online.SharePoint.PowerShell
-6. Microsoft Teams Module: Install-Module MicrosoftTeams
+1. **Azure RM module**
+2. **Sharepoint management shell**: https://www.microsoft.com/en-us/download/details.aspx?id=35588
+3. **Azure AD Module**: Install-Module AzureAD
+4. **MS Online module**: Install-Module MSOnline
+5. **Sharepoint Online module**: Install-Module Microsoft.Online.SharePoint.PowerShell
+6. **Microsoft Teams Module**: Install-Module MicrosoftTeams
+7. **PowerApps Modules**" Install-Module -Name Microsoft.PowerApps.Administration.PowerShell & Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber
+8. **PowerApps Plan 2 license or trial license**: This is required for the powerapps/flow admin actions
+9. **Office 365 Global Administrator**: Due to the extent of actions we take, a lot of items that are touched will require global admin permissions.
+
 
 ## Graph API
 In order to retrieve Graph reports, a graph api application is needed:
