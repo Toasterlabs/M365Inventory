@@ -11,8 +11,53 @@
         Height="600" 
         Width="1000"
         WindowStartupLocation="CenterScreen">
-   
+
     <Window.Resources>
+        <!--Control colors.-->
+        <Color x:Key="WindowColor">#FFE8EDF9</Color>
+        <Color x:Key="ContentAreaColorLight">#FFC5CBF9</Color>
+        <Color x:Key="ContentAreaColorDark">#FF7381F9</Color>
+        <Color x:Key="DisabledControlLightColor">#FFE8EDF9</Color>
+        <Color x:Key="DisabledControlDarkColor">#FFC5CBF9</Color>
+        <Color x:Key="DisabledForegroundColor">#FF888888</Color>
+        <Color x:Key="SelectedBackgroundColor">#FFC5CBF9</Color>
+        <Color x:Key="SelectedUnfocusedColor">#FFDDDDDD</Color>
+        <Color x:Key="ControlLightColor">White</Color>
+        <Color x:Key="ControlMediumColor">#FF7381F9</Color>
+        <Color x:Key="ControlDarkColor">#FF211AA9</Color>
+        <Color x:Key="ControlMouseOverColor">#FF3843C4</Color>
+        <Color x:Key="ControlPressedColor">#FF211AA9</Color>
+        <Color x:Key="GlyphColor">#FF444444</Color>
+        <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
+        <!--Border colors-->
+        <Color x:Key="BorderLightColor">#FFCCCCCC</Color>
+        <Color x:Key="BorderMediumColor">#FF888888</Color>
+        <Color x:Key="BorderDarkColor">#FF444444</Color>
+        <Color x:Key="PressedBorderLightColor">#FF888888</Color>
+        <Color x:Key="PressedBorderDarkColor">#FF444444</Color>
+        <Color x:Key="DisabledBorderLightColor">#FFAAAAAA</Color>
+        <Color x:Key="DisabledBorderDarkColor">#FF888888</Color>
+        <Color x:Key="DefaultBorderBrushDarkColor">Black</Color>
+        <!--Control-specific resources.-->
+        <Color x:Key="HeaderTopColor">#FFC5CBF9</Color>
+        <Color x:Key="DatagridCurrentCellBorderColor">Black</Color>
+        <Color x:Key="SliderTrackDarkColor">#FFC5CBF9</Color>
+        <Color x:Key="NavButtonFrameColor">#FF3843C4</Color>
+        <LinearGradientBrush x:Key="MenuPopupBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="{DynamicResource ControlLightColor}" Offset="0" />
+            <GradientStop Color="{DynamicResource ControlMediumColor}" Offset="0.5" />
+            <GradientStop Color="{DynamicResource ControlLightColor}" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ProgressBarIndicatorAnimatedFill" StartPoint="0,0" EndPoint="1,0">
+            <LinearGradientBrush.GradientStops>
+                <GradientStopCollection>
+                    <GradientStop Color="#000000FF" Offset="0" />
+                    <GradientStop Color="#600000FF" Offset="0.4" />
+                    <GradientStop Color="#600000FF" Offset="0.6" />
+                    <GradientStop Color="#000000FF" Offset="1" />
+                </GradientStopCollection>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
         <Style x:Key="ComboBox" TargetType="{x:Type ComboBox}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -64,7 +109,40 @@
             <Style.Triggers>
             </Style.Triggers>
         </Style>
-        </Window.Resources>
+        <Style TargetType="GroupBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0"
+                                 BorderThickness="1"
+                                 BorderBrush="SkyBlue"
+                                 Background="SkyBlue">
+                                <Label Foreground="White"
+                                       FontSize="14"
+                                       FontStyle="Normal">
+                                    <ContentPresenter Margin="1"
+                                    ContentSource="Header"
+                                    RecognizesAccessKey="True" />
+                                </Label>
+                            </Border>
+                            <Border Grid.Row="1"
+                                BorderThickness="1,0,1,1"
+                                CornerRadius="0,0,0,0">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="SkyBlue" />
+                                </Border.BorderBrush>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid x:Name="Grid" Margin="0,0,0,0">
         <!-- White Background -->
         <Border Name="Mask" CornerRadius="8" Background="White" Margin="0,0,0,0" />
@@ -113,7 +191,7 @@
                 <Image x:Name="IMG_TitleBar_Close" VerticalAlignment="Center" HorizontalAlignment="Center" Source="C:\Dev\M365 Inventory Automation (Metro)\M365 Inventory Automation (Metro)\Resources\Icons\appbar.Close_black.png"/>
             </Button>
             <!-- END Simple Titlebar -->
-            <TabControl x:Name="tabControl" Grid.Row="1" FontStyle="Italic" HorizontalAlignment="Left" BorderBrush="White" Foreground="White" Margin="0,0,0,0" Grid.ColumnSpan="3" Width="998">
+            <TabControl x:Name="tabControl" Grid.Row="1" FontStyle="Italic" HorizontalAlignment="Left" BorderBrush="White" Foreground="White" Margin="0,0,0,0" Grid.ColumnSpan="6" VerticalAlignment="Top" Height="565" Width="998">
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Template">
@@ -226,16 +304,8 @@
                             </Button.Resources>
                         </Button>
                         <!-- END Output Directory -->
-                        <!-- Tenant -->
-                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2">
-                            <DockPanel>
-                                <Image x:Name="IMG_Home_Tenant" HorizontalAlignment="Center" VerticalAlignment="Center" Source="C:\Dev\M365 Inventory Automation (Metro)\M365 Inventory Automation (Metro)\Resources\Icons\appbar.office.365.png" Grid.Row="0" Grid.Column="0"/>
-                                <TextBox x:Name="txt_Home_Tenant" ToolTip="Tenant name (tenantname.onmicrosoft.com)"  FontStyle="Normal" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Text="contoso.onmicrosoft.com" MaxLines="1" BorderThickness="0"/>
-                            </DockPanel>
-                        </Border>
-                        <!-- END Tenant -->
                         <!-- Region -->
-                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2">
+                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2">
                             <DockPanel>
                                 <Image x:Name="IMG_Home_region" HorizontalAlignment="Center" VerticalAlignment="Center" Source="C:\Dev\M365 Inventory Automation (Metro)\M365 Inventory Automation (Metro)\Resources\Icons\appbar.office.365.png" Grid.Row="0" Grid.Column="0"/>
                                 <ComboBox x:Name="DD_Home_Region" ToolTip="Region your environment is hosted in. Usually this can be set to Default" Grid.Row="5" Grid.Column="3" Height="30" Style="{DynamicResource ComboBox}"/>
@@ -243,7 +313,7 @@
                         </Border>
                         <!-- END Region -->
                         <!-- Graph App ID -->
-                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2">
+                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2">
                             <DockPanel>
                                 <Image x:Name="IMG_Home_GraphAPPID" HorizontalAlignment="Center" VerticalAlignment="Center" Source="C:\Dev\M365 Inventory Automation (Metro)\M365 Inventory Automation (Metro)\Resources\Icons\appbar.cogs.png" Grid.Row="0" Grid.Column="0"/>
                                 <TextBox x:Name="txt_Home_GraphAppID" ToolTip="Azure Graph application ID"  FontStyle="Normal" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" MaxLines="1" BorderThickness="0"/>
@@ -251,7 +321,7 @@
                         </Border>
                         <!-- END Graph App ID -->
                         <!-- Checkboxes -->
-                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="2">
+                        <Border BorderBrush="SkyBlue" BorderThickness="1" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2">
                             <DockPanel IsEnabled="False" ToolTip="These options are currently not supported">
                                 <CheckBox x:Name="chk_MFA" Content="MFA" Margin="5,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 <CheckBox x:Name="chk_Output" Content="Save Reports to Disk" Margin="10,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -259,7 +329,7 @@
                         </Border>
                         <!-- END Checkboxes -->
                         <!-- Launch Button -->
-                        <Button x:Name="BTN_Home_GO" Content="Go!" Grid.Row="15" Grid.Column="1" Grid.ColumnSpan="2" IsEnabled="True" Background="Green" Foreground="White" FontSize="20">
+                        <Button x:Name="BTN_Home_GO" Content="Go!" Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="2" IsEnabled="True" Background="Green" Foreground="White" FontSize="20">
                             <Button.Resources>
                                 <Style TargetType="{x:Type Border}">
                                     <Setter Property="CornerRadius" Value="7"/>
@@ -363,7 +433,89 @@
                     </Grid>
                 </TabItem>
                 <TabItem Header="General" x:Name="TabItem_General" Foreground="Black" BorderBrush="White" Background="White">
-                    <Grid>
+                    <Grid Margin="0,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="250"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- General information -->
+                        <GroupBox x:Name="GenInfo" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="15" Header="TENANT AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                            <Label Content="Tenant:" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Organization:" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Country:" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Technical Contact:" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Contact Phone number:" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="DirSync Enabled:" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Last DirSync:" Grid.Row="8" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Password Sync Enabled:" Grid.Row="9" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Last Password Sync:" Grid.Row="10" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Feature release:" Grid.Row="11" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total plans:" Grid.Row="12" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Licenses:" Grid.Row="13" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total assigned licenses:" Grid.Row="14" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <TextBlock x:Name="txtTenant" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtOrg" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtCountry" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTechnicalContact" Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtContactPhone" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtDirSyncEnabled" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtDirSyncLastSync" Grid.Row="8" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtPassSyncEnabled" Grid.Row="9" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtPassSyncLastSync" Grid.Row="10" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtFeatureRelease" Grid.Row="11" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalPlans" Grid.Row="12" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalLicense" Grid.Row="13" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalAssignedLicenses" Grid.Row="14" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                        <GroupBox x:Name="ObjectInfo" Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="3" Grid.RowSpan="15" Header="OBJECT TOTALS AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                            <Label Content="Total Users:" Grid.Row="2" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Synced Users:" Grid.Row="3" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Cloud users:" Grid.Row="4" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total unlicensed users:" Grid.Row="5" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Contacts:" Grid.Row="6" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Guests:" Grid.Row="7" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Groups:" Grid.Row="8" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Mailboxes:" Grid.Row="9" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Shared Mailboxes:" Grid.Row="10" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Rooms:" Grid.Row="11" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Equipment:" Grid.Row="12" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <Label Content="Total Site Collections:" Grid.Row="13" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                            <TextBlock x:Name="txtTotalUsers" Grid.Row="2" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalSyncedUsers" Grid.Row="3" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalCloudUsers" Grid.Row="4" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalUnlicensedUsers" Grid.Row="5" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalContacts" Grid.Row="6" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalGuests" Grid.Row="7" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalTotalGroups" Grid.Row="8" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalmailboxes" Grid.Row="9" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalSharedMailboxes" Grid.Row="10" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalRooms" Grid.Row="11" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalEquipment" Grid.Row="12" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                            <TextBlock x:Name="txtTotalSiteCollections" Grid.Row="13" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Azure AD" x:Name="TabItem_AAD" Foreground="Black" BorderBrush="White" Background="White">
@@ -372,6 +524,71 @@
                 </TabItem>
                 <TabItem Header="Exchange Online" x:Name="TabItem_ExO" Foreground="Black" BorderThickness="0" Background="White">
                     <Grid>
+                        <TabControl BorderThickness="0" >
+                            <TabControl.Resources>
+                                <Style TargetType="TabItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TabItem">
+                                                <Grid Name="Panel">
+                                                    <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="TextElement.Foreground" TargetName="ContentSite" Value="SkyBlue"/>
+                                                        <Setter Property="TextElement.FontSize" TargetName="ContentSite" Value="23"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="False">
+                                                        <Setter Property="TextElement.Foreground" TargetName="ContentSite" Value="Gray"/>
+                                                        <Setter Property="TextElement.FontSize" TargetName="ContentSite" Value="23"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TabControl.Resources>
+                            <TabItem Header="General">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="5"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <GroupBox x:Name="EXOGenInfo" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="14" Header="TENANT AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
                     </Grid>
                 </TabItem>
                 <TabItem Header="SharePoint Online" x:Name="TabItem_SPO" Foreground="Black" BorderBrush="White" Background="White">

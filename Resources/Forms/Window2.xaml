@@ -1,0 +1,1626 @@
+﻿<Controls:MetroWindow
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	x:Name="MainWindow"
+	Height="1250"
+	Width="1800"
+	Title="O365 Data Retriever v0.2.2" MinHeight="900" MinWidth="1550" ResizeMode="CanMinimize" 
+            WindowStartupLocation="CenterScreen" Background="White" Cursor="Hand" FontFamily="Segoe UI" SizeToContent="WidthAndHeight" BorderBrush="{DynamicResource AccentColorBrush}"
+                      BorderThickness="1" WindowStyle="ThreeDBorderWindow" TitleCharacterCasing="Normal" >
+
+
+    <!-- Resources from MahApps -->
+    <Controls:MetroWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Create Metro Style  -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Blue.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Controls:MetroWindow.Resources>
+    <!-- END Resources from MahApps -->
+
+    <!-- Icons and Links on Title Bar -->
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button x:Name="GHButton">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_github}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Github"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="TwitterButton">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_twitter_bird}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Twitter"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="WordPressButton">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="20" Height="20" Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_social_wordpress_variant}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0" VerticalAlignment="Center" Text="Blog"/>
+                </StackPanel>
+            </Button>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+    <!-- END of Icons and Links on Title Bar -->
+
+    <!-- Start the main area -->
+    <!--Main grid-->
+    <Grid>
+
+        <!--Top of the window-->
+        <Image HorizontalAlignment="Center" VerticalAlignment="Top" Height="223" Width="279" Margin="-34,-27,1539,0"  />
+
+        <Label x:Name="TenantLabel" Content="Tenant:" HorizontalAlignment="Left" Margin="216,14,-70,0" VerticalAlignment="Top" Width="65" FontFamily="Segoe UI" FontWeight="Bold" FontSize="13"/>
+        <TextBlock x:Name="TenantTextBlock" HorizontalAlignment="Left" Margin="353,24,-142,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+        <Label x:Name="OrgNameLabel" Content="Org. Name:" HorizontalAlignment="Left" Margin="216,40,-88,0" VerticalAlignment="Top" Width="82" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="OrgNameTextBlock" HorizontalAlignment="Left" Margin="353,45,-144,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+        <Label x:Name="TenantCountryLabel" Content="Country:" HorizontalAlignment="Left" Margin="216,65,-68,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="CountryTextBlock" HorizontalAlignment="Left" Margin="353,70,-143,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+        <Label x:Name="TechContactLabel" Content="Technical Contact:" HorizontalAlignment="Left" Margin="216,92,-124,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="TechContactTextBlock" HorizontalAlignment="Left" Margin="353,97,-142,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+        <Label x:Name="PhoneNumberLabel" Content="Contact Phone Nbr:" HorizontalAlignment="Left" Margin="216,119,-135,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="ContactPhoneNbrTextBlock" HorizontalAlignment="Left" Margin="353,124,-142,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+
+        <Label x:Name="DirSyncEnabledLabel" Content="DirSync Enabled:" HorizontalAlignment="Left" Margin="595,14,-495,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="DirSyncEnabledTextBlock" HorizontalAlignment="Left" Margin="760,21,-548,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold" FontSize="13"/>
+        <Label x:Name="PwdSyncEnabledLabel" Content="Password Sync Enabled:" HorizontalAlignment="Left" Margin="595,40,-538,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="PwdSyncEnabledTextBlock" HorizontalAlignment="Left" Margin="760,47,-548,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold" FontSize="13"/>
+        <Label x:Name="LastDirSyncTimeLabel" Content="Last DirSync Time:" HorizontalAlignment="Left" Margin="595,65,-505,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="LastDirSyncTimeTextBlock" HorizontalAlignment="Left" Margin="760,73,-548,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+        <Label x:Name="LastPwdSyncTimeLabel" Content="Last Pwd Sync Time:" HorizontalAlignment="Left" Margin="595,92,-516,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="LastPwdSyncTimeTextBlock" HorizontalAlignment="Left" Margin="760,100,-548,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+        <Label x:Name="FeaturesReleaseLabel" Content="Features Release:" HorizontalAlignment="Left" Margin="595,119,-497,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" FontSize="13"/>
+        <TextBlock x:Name="FeaturesReleaseTextBlock" HorizontalAlignment="Left" Margin="760,125,-548,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13"/>
+
+        <Label x:Name="TotalPlansLabel" Content="Total Nbr of Plans:" HorizontalAlignment="Left" Margin="1020,14,-913,0" VerticalAlignment="Top" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"/>
+        <TextBlock x:Name="TotalNbrPlansTextBlock" HorizontalAlignment="Left" Margin="1260,18,-1015,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontWeight="Bold"/>
+        <Label x:Name="TotalLicensesLabel" Content="Total Licenses (all plans):" HorizontalAlignment="Left" Margin="1020,40,-951,0" VerticalAlignment="Top" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"/>
+        <TextBlock x:Name="TotalLicensesTextBlock" HorizontalAlignment="Left" Margin="1260,44,-1015,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontWeight="Bold"/>
+        <Label x:Name="TotalLicensesAssignedLabel" Content="Total Assigned Licenses (all plans):" HorizontalAlignment="Left" Margin="1020,67,0,0" VerticalAlignment="Top" FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"/>
+        <TextBlock x:Name="TotalAssignedLicensesTextBlock" HorizontalAlignment="Left" Margin="1260,72,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="13" FontWeight="Bold"/>
+
+        <Image x:Name="ProfileIcon"  HorizontalAlignment="Left" Height="23" Margin="1471,17,0,0" VerticalAlignment="Top" Width="23"/>
+        <TextBox x:Name="AdminTextBox" HorizontalAlignment="Left" Height="21" Margin="1505,15,-1435,0" VerticalAlignment="Top" Width="230" Controls:TextBoxHelper.Watermark="Enter your Global Admin account" Controls:TextBoxHelper.ClearTextButton="True" MaxLines="1" FocusManager.FocusedElement="{Binding ElementName=AdminTextBox}"/>
+        <Image x:Name="PwdIcon"  HorizontalAlignment="Left" Height="23" Margin="1473,50,0,0" VerticalAlignment="Top" Width="23"/>
+        <PasswordBox x:Name="AdminPwdTextbox" HorizontalAlignment="Left" Margin="1505,50,-1435,0" VerticalAlignment="Top" Width="230"  Controls:TextBoxHelper.Watermark="Enter your Global Admin password" Controls:TextBoxHelper.ClearTextButton="True" Style="{StaticResource MetroButtonRevealedPasswordBox}" Height="21" />
+
+        <!--Buttons to Connect/Disconnect-->
+        <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="1505,90,0,0" VerticalAlignment="Top" Width="110" Height="29" IsEnabled="False" Cursor="Hand" IsDefault="True" RenderTransformOrigin="0.5,0.5" FontSize="13">
+            <Button.Resources>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="CornerRadius" Value="7"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+        <Button x:Name="DisconnectButton" Content="Disconnect" HorizontalAlignment="Left" Margin="1631,90,0,0" VerticalAlignment="Top" Width="103" Height="29" IsEnabled="False" Cursor="Hand" FontSize="13">
+            <Button.Resources>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="CornerRadius" Value="7"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+        <!--END Top of the window-->
+
+        <!--Start of Main Tab Control-->
+        <TabControl x:Name="MainTabControl" HorizontalAlignment="Left" Height="800" Margin="10,196,0,0" VerticalAlignment="Top" Width="1765">
+            <TabItem Header="Tenant">
+                <Grid>
+                    <!--DOMAINS datagrid-->
+                    <DataGrid x:Name="DomainsDataGrid" Margin="10,32,0,0" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+										  VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False" MinHeight="540" GridLinesVisibility="Horizontal" Width="514" Height="666">
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property ="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding Name}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Default" Binding="{Binding IsDefault}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Status" Binding="{Binding Status}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Authentication" Binding="{Binding Authentication}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!--PLANS datagrid-->
+                    <DataGrid x:Name="PlansDataGrid" Margin="594,32,609,431" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Stretch"
+									VerticalAlignment="Stretch" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" >
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property ="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="auto" Header="SkuPart" Binding="{Binding SkuPartNumber}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Total Licenses" Binding="{Binding TotalLicenses}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Trial" Binding="{Binding IsTrial}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Status" Binding="{Binding Status}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!--GLOBAL ADMINS datagrid-->
+                    <DataGrid x:Name="GADataGrid" Margin="594,419,609,57" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Stretch"
+									VerticalAlignment="Stretch" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False" Height="279" GridLinesVisibility="Horizontal" >
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property ="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding DisplayName}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Email Address" Binding="{Binding EmailAddress}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Licensed" Binding="{Binding IsLicensed}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <GroupBox x:Name="MoreInfo" Header="More Info" HorizontalAlignment="Left" Height="666" Margin="1206,32,0,0" VerticalAlignment="Top" Width="489">
+                        <Grid HorizontalAlignment="Left" Height="594" Margin="10,10,0,0" VerticalAlignment="Top" Width="508">
+                            <Label x:Name="NbrOfUsersLabel" Content="Total Nbr of Users:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,5,0,0" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="165" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfUsersTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="18" Width="32" Margin="238,9,0,0" FontFamily="Segoe UI" FontSize="14"/>
+                            <Label x:Name="NbrOfSyncedUsersLabel" Content="Total Nbr of Synced Users:" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="197" Margin="0,53,0,0" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfSyncedUsersTextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="238,59,0,0" FontWeight="Normal" Height="18" Width="32" FontFamily="Segoe UI" FontSize="14"/>
+                            <Label x:Name="NbrOfCloudUsersLabel" Content="Total Nbr of Cloud Users:" HorizontalAlignment="Left" Margin="0,98,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="186" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfCloudUsersTextBlock" HorizontalAlignment="Left" Margin="238,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="19" Width="32" FontFamily="Segoe UI" FontSize="14"/>
+                            <Label x:Name="NbrOfBlockedUsersLabel" Content="Total Nbr of Blocked Users:" HorizontalAlignment="Left" Margin="0,145,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="204" FontSize="14"/>
+                            <Label x:Name="BlockedNotLicensedLabel" Content="(Not licensed)" HorizontalAlignment="Left" Margin="0,165,0,0" VerticalAlignment="Top" FontStyle="Italic" Height="29" Width="92" FontFamily="Segoe UI" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfBlockedUsersTextBlock" HorizontalAlignment="Left" Margin="238,153,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="18" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfBlockedAndLicensedUsersLabel" Content="Total Nbr of Blocked &#xD;&#xA;And Licensed Users:" HorizontalAlignment="Left" Margin="0,206,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Width="181" Height="50" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfBlockedAndLicensedUsersTextBlock" HorizontalAlignment="Left" Margin="238,224,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold" Height="18" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfContactsLabel" Content="Total Nbr of Contacts:" HorizontalAlignment="Left" Margin="0,274,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="165" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfContactsTextBlock" HorizontalAlignment="Left" Margin="238,281,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="19" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfGuestsLabel" Content="Total Nbr of Guests:" HorizontalAlignment="Left" Margin="0,319,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="165" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfGuestsTextBlock" HorizontalAlignment="Left" Margin="238,324,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="18" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfGroupsLabel" Content="Total Nbr of Groups:" HorizontalAlignment="Left" Margin="0,365,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="165" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfGroupsTextBlock" HorizontalAlignment="Left" Margin="238,372,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="19" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfSharedMlxLabel" Content="Total Nbr of Shared Mailboxes:" HorizontalAlignment="Left" Margin="0,411,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="28" Width="227" FontSize="14"/>
+                            <TextBlock x:Name="NbrOfShdMlbxTtextBlock" HorizontalAlignment="Left" Margin="238,418,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="18" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfRoomsLabel" Content="Total Nbr of Rooms:" HorizontalAlignment="Left" Margin="0,462,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="152" FontSize="14"/>
+                            <TextBlock x:Name="NbrofRoomsTextBlock" HorizontalAlignment="Left" Margin="238,469,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Normal" Height="19" Width="32" FontSize="14"/>
+                            <Label x:Name="NbrOfEquipmentLabel" Content="Total Nbr of Equipement:" HorizontalAlignment="Left" Margin="0,512,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI" Height="29" Width="186" FontSize="14"/>
+                            
+                        </Grid>
+                    </GroupBox>
+
+                    <!--Buttons to Export Csv-->
+                    <Controls:Badged x:Name="ExportDomainsBadge" Badge="{Binding Path=BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="358,710,1255,15" >
+                        <Button x:Name="ExportDomainsButton" Content="Export Domains" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" RenderTransformOrigin="0.5,0.96" HorizontalAlignment="Right" Width="146" Margin="0,-3,0,0" />
+                    </Controls:Badged>
+
+                    <Controls:Badged x:Name="ExportPlansBadge" Badge="{Binding Path=BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1003,337,627,388" >
+                        <Button x:Name="ExportPlansButton" Content="Export Plans" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Width="129" Margin="0,-2,0,0"/>
+                    </Controls:Badged>
+
+                    <Controls:Badged x:Name="ExportGABadge" Badge="{Binding Path=BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="949,710,627,15" >
+                        <Button x:Name="ExportGAButton" Content="Export Global Admins" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Width="183" Margin="0,-3,0,0" />
+                    </Controls:Badged>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Exchange Online">
+                <Grid>
+                    <!--EXO Sub-tab control-->
+                    <TabControl x:Name="ExoSubTabControl1" HorizontalAlignment="Left" Margin="0,-2,-6,0" Width="1765" Height="760" VerticalAlignment="Top">
+                        <TabItem Header="Recipients" >
+                            <Grid>
+                                <!--Mlbx & Res. datagrid-->
+                                <DataGrid x:Name="MlbxAndResourcesDataGrid" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+														VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+														GridLinesVisibility="Horizontal" Margin="10,14,0,377" Grid.ColumnSpan="2" Width="1740" Height="300">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding DisplayName}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="UPN" Binding="{Binding UserPrincipalName}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Mailbox Type" Binding="{Binding RecipientTypeDetails}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Primary SMTP" Binding="{Binding PrimarySmtpAddress}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="80" Header="Archive" Binding="{Binding ArchiveStatus}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Archive Quota" Binding="{Binding ArchiveQuota}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Audit Enabled" Binding="{Binding AuditEnabled}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Synced" Binding="{Binding IsDirSynced}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Shared" Binding="{Binding IsShared}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportMlbxAndResBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1512,324,27,355" >
+                                    <Button x:Name="ExportMlbxAndResButton" Content="Export Mlbx and Resources" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Width="220" Margin="0,2,0,0"/>
+                                </Controls:Badged>
+
+                                <!--Groups datagrid-->
+                                <DataGrid x:Name="GroupsDataGrid" Height="260" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,376,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True"
+										  CanUserSortColumns="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" Width="777">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding DisplayName}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Email Address" Binding="{Binding EmailAddress}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Group Type" Binding="{Binding GroupType}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <TextBlock x:Name="O365GroupsIncludedTextBlock" HorizontalAlignment="Left" Margin="19,646,0,0" TextWrapping="Wrap" Text="* O365 Groups included" VerticalAlignment="Top" FontWeight="Bold" FontStyle="Italic" FontSize="15" Foreground="#FFF33131"/>
+
+                                <Controls:Badged x:Name="ExportGroupsBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="643,648,987,37">
+                                    <Button x:Name="ExportGroupsButton" Content="Export Groups" FontFamily="Segoe UI" FontSize="14" Grid.Row="1" FontWeight="Normal" HorizontalAlignment="Right" VerticalAlignment="Top" Width="136" Height="32" Margin="-7,0,0,-2"/>
+                                </Controls:Badged>
+
+                                <!--Contacts datagrid-->
+                                <DataGrid x:Name="ContactsDataGrid" HorizontalAlignment="Left" Height="260" Width="911" Margin="838,376,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" VerticalAlignment="Top">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding DisplayName}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Company" Binding="{Binding Company}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Title" Binding="{Binding Title}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Country / Region" Binding="{Binding CountryOrRegion}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Postal Code" Binding="{Binding PostalCode}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Synced" Binding="{Binding IsDirSynced}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Recipient Details" Binding="{Binding RecipientTypeDetails}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportContactsBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1590,648,27,37" >
+                                    <Button x:Name="ExportContactsButton" Content="Export Contacts" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="140" Height="34" Margin="0,0,0,-4"/>
+                                </Controls:Badged>
+                            </Grid>
+                        </TabItem>
+
+                        <!--Permissions Tab-->
+                        <TabItem Header="Permissions">
+                            <TabControl x:Name="PermissionsSubtabControl" Margin="0,0,-1,0" >
+                                <TabItem Header="Admin Roles">
+                                    <Grid>
+                                        <DataGrid x:Name="AdminRolesDataGrid" Margin="10,28,0,0" HorizontalAlignment="Left" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" VerticalAlignment="Top" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="450" Header="Description" Binding="{Binding Description}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Members" Binding="{Binding Members}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="200" Header="Roles" Binding="{Binding Roles}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportAdminRolesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1549,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportAdminRolesButton" Content="Export Admin Roles" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="178" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="User Roles">
+                                    <Grid>
+                                        <DataGrid x:Name="UserRolesDataGrid" Margin="10,28,0,0" HorizontalAlignment="Left" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" VerticalAlignment="Top" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="auto" Header="Policy Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Is Default" Binding="{Binding IsDefault}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Description" Binding="{Binding Description}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Assigned Roles" Binding="{Binding AssignedRoles}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportUserRolesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1549,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportUserRolesButton" Content="Export User Roles" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="178" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="OWA Policies">
+                                    <Grid>
+                                        <DataGrid x:Name="OWAPoliciesDataGrid" Margin="10,28,0,0" HorizontalAlignment="Left" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" VerticalAlignment="Top" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="auto" Header="Policy Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Is Default" Binding="{Binding IsDefault}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Created" Binding="{Binding WhenCreated}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Changed" Binding="{Binding WhenChanged}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportOWAPoliciesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1549,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportOWAPoliciesButton" Content="Export OWA Policies" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="178" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+                            </TabControl>
+                        </TabItem>
+
+                        <!--Protection Tab-->
+                        <TabItem Header="Protection">
+                            <TabControl x:Name="ProtectionSubTabControl" >
+                                <TabItem Header="Malware Filter">
+                                    <Grid>
+                                        <DataGrid x:Name="MalwareFilterDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="250" Header="Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Is Default" Binding="{Binding IsDefault}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Action" Binding="{Binding Action}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Custom Notifications" Binding="{Binding CustomNotifications}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Created" Binding="{Binding WhenCreated}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Changed" Binding="{Binding WhenChanged}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportMalwareFilterBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1536,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportMalwareFiltersButton" Content="Export Malware Filters" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="190" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="Connection Filter">
+                                    <Grid>
+                                        <DataGrid x:Name="ConnectionFilterDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="250" Header="Policy Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Is Default" Binding="{Binding Default}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Safe List" Binding="{Binding SafeList}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="200" Header="IP Allow List" Binding="{Binding IPAllowList}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="200" Header="IP Blocked List" Binding="{Binding IPBlockList}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportConnectionFilterBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1505,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportConnFiltersButton" Content="Export Connection Filters" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="221" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="Spam Filter">
+                                    <Grid>
+                                        <DataGrid x:Name="SpamFilterDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="auto" Header="Policy Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Is Default" Binding="{Binding IsDefault}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Spam Action" Binding="{Binding SpamAction}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="High Confidence" Binding="{Binding HighConfidenceSpamAction}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Bulk Email As Spam" Binding="{Binding BulkSpamAction}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="90" Header="Threshold" Binding="{Binding BulkThreshold}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="International Spam (Languages)" Binding="{Binding LanguageBlockList}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="International Spam (Regions)" Binding="{Binding RegionBlockList}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="End Users Spam Notifications" Binding="{Binding EndUserSpamNotificationFrequency}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportSpamFilterBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1557,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportSpamFiltersButton" Content="Export Spam Filters" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="169" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="Dkim">
+                                    <Grid>
+                                        <DataGrid x:Name="DkimDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="250" Header="Domain" Binding="{Binding Domain}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Enabled" Binding="{Binding Enabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="200" Header="Status" Binding="{Binding Status}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="250" Header="Last Checked" Binding="{Binding LastChecked}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportDkimBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1593,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportDkimButton" Content="Export Dkim" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="133" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+                            </TabControl>
+                        </TabItem>
+
+
+                        <!--Mail Flow Tab-->
+                        <TabItem Header="Mail Flow">
+                            <TabControl x:Name="MailFlowSubTabControl" >
+                                <TabItem Header="Rules">
+                                    <Grid>
+                                        <DataGrid x:Name="RulesDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="250" Header="Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="State" Binding="{Binding State}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Mode" Binding="{Binding Mode}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="70" Header="Priority" Binding="{Binding Priority}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="200" Header="Comments" Binding="{Binding Comments}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Activation Date" Binding="{Binding ActivationDate}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Expiry Date" Binding="{Binding ExpiryDate}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportRulesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1593,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportRulesButton" Content="Export Rules" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="133" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="Accepted Domains">
+                                    <Grid>
+                                        <DataGrid x:Name="AcceptedDomainsDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="250" Header="Name" Binding="{Binding DomainName}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="100" Header="Default" Binding="{Binding Default}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Domain Type" Binding="{Binding DomainType}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Externally Managed" Binding="{Binding ExternallyManaged}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="200" Header="Address Book Enabled" Binding="{Binding AddressBookEnabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportAcceptedDomainsBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1514,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportAcceptedDomainsButton" Content="Export Accepted Domains" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="212" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+
+                                <TabItem Header="Remote Domains">
+                                    <Grid>
+                                        <DataGrid x:Name="RemoteDomainsDataGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,28,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" Width="1734" Height="560">
+                                            <DataGrid.Resources>
+                                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                                    <Setter Property ="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="FQDN" Binding="{Binding DomainName}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="140" Header="OOF Replies" Binding="{Binding AllowedOOFType}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="140" Header="Automatic Replies Enabled" Binding="{Binding AutoReplyEnabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="140" Header="Automatic Forward" Binding="{Binding AutoForwardEnabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="140" Header="Delivery Report" Binding="{Binding DeliveryReportEnabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="140" Header="NDRs Enabled" Binding="{Binding NDREnabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Width="auto" Header="Meeting Forward" Binding="{Binding MeetingForwardNotificationEnabled}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style>
+                                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Controls:Badged x:Name="ExportRemoteDomainsBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1524,601,27,34" RenderTransformOrigin="0.5,0.5" >
+                                            <Button x:Name="ExportRemoteDomainsButton" Content="Export Remote Domains" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="202" Height="34"/>
+                                        </Controls:Badged>
+                                    </Grid>
+                                </TabItem>
+                            </TabControl>
+                        </TabItem>
+
+                        <!--Mobile Tab-->
+                        <TabItem Header="Mobile">
+                            <Grid>
+                                <!--Quarantined Devices-->
+                                <DataGrid x:Name="QuarantinedDevicesDataGrid" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+														VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+														GridLinesVisibility="Horizontal" Margin="10,14,0,377" Width="1740" Height="300">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding Name}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Phone" Binding="{Binding FriendlyName}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Device OS" Binding="{Binding DeviceOS}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Device Status" Binding="{Binding DeviceAccessState}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="100" Header="Managed" Binding="{Binding IsManaged}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="100" Header="Compliant" Binding="{Binding IsCompliant}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="100" Header="Disabled" Binding="{Binding IsDisabled}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Connection Time" Binding="{Binding WhenCreated}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportQuarantinedDevicesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1500,324,27,355" >
+                                    <Button x:Name="ExportQuarantinedButton" Content="Export Quarantined Devices" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Width="232" Margin="0,2,0,0"/>
+                                </Controls:Badged>
+
+                                <!--Device Access Rules-->
+                                <DataGrid x:Name="DeviceAccessRulesDataGrid" Height="260" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,376,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True"
+										  CanUserSortColumns="True" CanUserAddRows="False" GridLinesVisibility="Horizontal" Width="777">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding Name}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+
+                                        <DataGridTextColumn Width="auto" Header="Device" Binding="{Binding QueryString}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Characteristic" Binding="{Binding Characteristic}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Access Level" Binding="{Binding AccessLevel}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportDeviceAccessRulesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="552,648,987,37">
+                                    <Button x:Name="ExportDeviceAccessRulesButton" Content="Export Device Access Rules" FontFamily="Segoe UI" FontSize="14" Grid.Row="1" FontWeight="Normal" HorizontalAlignment="Right" VerticalAlignment="Top" Width="220" Height="32" Margin="0,0,0,-2"/>
+                                </Controls:Badged>
+
+                                <!--Mobile device policies-->
+                                <DataGrid x:Name="MobileDeviceMlbxPoliciesDataGrid" HorizontalAlignment="Left" Height="260" Width="911" Margin="838,376,0,0" BorderBrush="Silver" BorderThickness="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+													GridLinesVisibility="Horizontal" VerticalAlignment="Top">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Name" Binding="{Binding Name}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Default Policy" Binding="{Binding IsDefault}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Allow Simple Password" Binding="{Binding AllowSimplePassword}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Min. Password Length" Binding="{Binding MinPasswordLength}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Max. Pwd Failed Attempts" Binding="{Binding MaxPasswordFailedAttempts}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Password History" Binding="{Binding PasswordHistory}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Min. Pwd Complex Characters" Binding="{Binding MinPasswordComplexCharacters}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Encryption Enabled" Binding="{Binding DeviceEncryptionEnabled}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Require Encryption" Binding="{Binding RequireDeviceEncryption}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Allow Camera" Binding="{Binding AllowCamera}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportDeviceMlbxPolicyBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1514,648,27,37" >
+                                    <Button x:Name="ExportDeviceMlbxPolicyButton" Content="Export Device Mlbx Policies" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="218" Height="34" Margin="0,0,0,-4"/>
+                                </Controls:Badged>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+
+                <!--SPO tab-->
+            </TabItem>
+            <TabItem Header="SharePoint Online">
+                <Grid>
+                    <TabControl x:Name="SpoSubTabControl" HorizontalAlignment="Left" Margin="0,-2,-6,0" Width="1765" Height="760" VerticalAlignment="Top">
+                        <TabItem Header="Site Collections">
+                            <Grid>
+                                <DataGrid x:Name="NbrOfSiteColDataGrid" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+														VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+														GridLinesVisibility="Horizontal" Margin="10,14,0,0" Width="1182" Height="619">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Title" Binding="{Binding Title}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Url" Binding="{Binding Url}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Storage Limit (GB)" Binding="{Binding StorageLimit}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Storage Used (GB)" Binding="{Binding StorageUsed}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Owner" Binding="{Binding Owner}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Sharing Capability" Binding="{Binding SharingCapability}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Status" Binding="{Binding LockState}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Template" Binding="{Binding Template}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Conditional Access Policy" Binding="{Binding ConditionalAccessPolicy}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportAllSCBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="983,648,582,37" >
+                                    <Button x:Name="ExportAllSCButton" Content="Export Site Collections" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="193" Height="34" Margin="0,0,0,-4"/>
+                                </Controls:Badged>
+
+                                <TextBlock x:Name="PersonalSitesNotIncludedTextBlock" HorizontalAlignment="Left" Margin="19,646,0,0" TextWrapping="Wrap" Text="* Please note Personal Sites are NOT included in this list" VerticalAlignment="Top" FontWeight="Bold" FontStyle="Italic" FontSize="15" Foreground="#FFF33131"/>
+
+                                <GroupBox x:Name="SPOMoreInfo" Header="More Info" HorizontalAlignment="Left" Height="619" Margin="1241,14,0,0" VerticalAlignment="Top" Width="508">
+                                    <Grid HorizontalAlignment="Left" Height="594" Margin="10,10,0,0" VerticalAlignment="Top" Width="508">
+                                        <Label x:Name="NbrOfSCLabel" Content="Nbr of Site Collections:" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" FontWeight="Bold" Width="152"/>
+                                        <Label x:Name="IncludingODFBLabel" Content="(Including ODFB)" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" FontStyle="Italic" />
+                                        <TextBlock x:Name="SPOTotalOfSCTextBlock" HorizontalAlignment="Left" Margin="290,27,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="TotalStorageLabel" Content="Total Storage (TB):" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPOTotalStorageTextBlock" HorizontalAlignment="Left" Margin="290,77,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="TotalStorageAllocatedLabel" Content="Total Storage Allocated (GB):" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPOTotalStorageAllocatedTextBlock" HorizontalAlignment="Left" Margin="290,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="TotalServerResourcesLabel" Content="Total Server Resources:" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPOTotalServerResourcesTextBlock" HorizontalAlignment="Left" Margin="290,136,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="TotalResourcesAllocatedLabel" Content="Total Resources Allocated:" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPOTotalResourcesAllocatedTextBlock" HorizontalAlignment="Left" Margin="290,167,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="SharingCapabilityLabel" Content="Sharing Capability:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPOSharingCapabilityTextBlock" HorizontalAlignment="Left" Margin="290,197,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="ReqInvitationWithSameAcctTextBlock" HorizontalAlignment="Left" Margin="13,230,0,0" TextWrapping="Wrap" Text="External Users to accept invite with same acct it was sent to:" VerticalAlignment="Top" FontWeight="Bold" Width="194"/>
+                                        <TextBlock x:Name="SPOExternalUsersInviteSameAcctTextBlock" HorizontalAlignment="Left" Margin="290,239,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="ODFBGuestEnabledLabel" Content="OneDrive for Guests Enabled:" HorizontalAlignment="Left" Margin="10,275,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="ODFBforGuestEnabledTextBlock" HorizontalAlignment="Left" Margin="290,282,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="DefaultSharingLinkTypeLabel" Content="Default Sharing Link Type:" HorizontalAlignment="Left" Margin="10,310,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPODefaultSharingLinkTypeTextBlock" HorizontalAlignment="Left" Margin="290,317,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="PreventExternalUsersResharingLabel" Content="Prevent External Users from Resharing:" HorizontalAlignment="Left" Margin="10,345,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPOPreventExternalUsersFromResharingTextBlock" HorizontalAlignment="Left" Margin="290,352,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="FileAnonymousLinkTypeLabel" Content="Anonymous Link Type (File):" HorizontalAlignment="Left" Margin="10,380,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="FileAnonymousLinkTypeTextBlock" HorizontalAlignment="Left" Margin="290,387,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="FolderAnonymousLinkTypeLabel" Content="Anonymous Link Type (Folder):" HorizontalAlignment="Left" Margin="10,415,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="FolderAnonymousLinkTypeTextBlock" HorizontalAlignment="Left" Margin="290,422,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="NotifyOwnersWhenItemsResharedLabel" Content="Notify Owners when Items Reshared:" HorizontalAlignment="Left" Margin="10,450,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPONotifyOwnersItemsResharedTextBlock" HorizontalAlignment="Left" Margin="290,457,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <Label x:Name="DefaultLinkPermissionLabel" Content="Default Link Permission:" HorizontalAlignment="Left" Margin="10,485,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                                        <TextBlock x:Name="SPODefaultLinkPermissionTextBlock" HorizontalAlignment="Left" Margin="290,492,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontWeight="Bold"/>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+                        </TabItem>
+
+                        <TabItem Header="Hubsites">
+                            <Grid>
+                                <DataGrid x:Name="NbrOfHubSitesDataGrid" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+														VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+														GridLinesVisibility="Horizontal" Margin="10,14,0,0" Width="1739" Height="619">
+                                    <DataGrid.Resources>
+                                        <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property ="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Width="auto" Header="Title" Binding="{Binding Title}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="350" Header="Description" Binding="{Binding Description}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Width="auto" Header="Url" Binding="{Binding SiteUrl}">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style>
+                                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Controls:Badged x:Name="ExportHubSitesBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1578,648,31,37" >
+                                    <Button x:Name="ExportHubSitesButton" Content="Export Hubsites" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="149" Height="34" Margin="0,0,0,-4"/>
+                                </Controls:Badged>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+
+
+            <!--ODFB tab-->
+            <TabItem Header="OneDrive for Business">
+                <Grid>
+                    <DataGrid x:Name="NbrOfPersoSiteColDataGrid" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+														VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+														GridLinesVisibility="Horizontal" Margin="10,14,0,0" Width="1739" Height="652">
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property ="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="auto" Header="User" Binding="{Binding Title}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Storage Limit (GB)" Binding="{Binding StorageLimit}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Storage Used (GB)" Binding="{Binding StorageUsed}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Owner" Binding="{Binding Owner}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Sharing Capability" Binding="{Binding SharingCapability}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Status" Binding="{Binding LockState}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Template" Binding="{Binding Template}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Controls:Badged x:Name="ExportAllPersoSCBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1522,683,31,37" >
+                        <Button x:Name="ExportAllPersoSCButton" Content="Export All Personal Sites" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="206" Height="34"/>
+                    </Controls:Badged>
+                </Grid>
+            </TabItem>
+
+            <!--Teams & Skype tab-->
+            <TabItem Header="Teams and Skype">
+                <Grid>
+                    <DataGrid x:Name="NbrOfSkypeUsersDataGrid" BorderBrush="Silver" BorderThickness="1" HorizontalAlignment="Left"
+										VerticalAlignment="Top" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" CanUserAddRows="False"
+										GridLinesVisibility="Horizontal" Margin="10,14,0,0" Width="1739" Height="652">
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property ="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="auto" Header="Display Name" Binding="{Binding DisplayName}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="UPN" Binding="{Binding UserPrincipalName}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Enabled" Binding="{Binding Enabled}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Location" Binding="{Binding UsageLocation}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Sip ProxyAddress" Binding="{Binding SipProxyAddress}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Proxy Addresses" Binding="{Binding ProxyAddresses}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="User Type" Binding="{Binding InterpretedUserType}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Hide From Address Lists" Binding="{Binding HideFromAddressLists}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Ent. Voice Enabled" Binding="{Binding EnterpriseVoiceEnabled}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Rich Presence" Binding="{Binding EnabledForRichPresence}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Archiving Policy" Binding="{Binding ArchivingPolicy}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Teams Meeting Policy" Binding="{Binding TeamsMeetingPolicy}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Teams Calling Policy" Binding="{Binding TeamsCallingPolicy}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Width="auto" Header="Teams Messaging Policy" Binding="{Binding TeamsMessagingPolicy}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style>
+                                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Controls:Badged x:Name="ExportSkypeUsersBadge" Badge="{Binding BadgeValue}" BadgePlacementMode="TopRight" BadgeBackground="Red" BadgeForeground="White" Margin="1565,683,31,37" >
+                        <Button x:Name="ExportSkypeUsersButton" Content="Export Skype Users" FontFamily="Segoe UI" FontSize="14" FontWeight="Normal" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Top" Width="163" Height="34"/>
+                    </Controls:Badged>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+    <!--END of main grid-->
+</Controls:MetroWindow>

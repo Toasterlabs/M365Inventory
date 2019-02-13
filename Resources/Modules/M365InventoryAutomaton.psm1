@@ -1080,7 +1080,7 @@ Function Get-SPOInventory{
 
 		# Configure Site URL and User 
 		$TenantID = (($VariableHash.tenantname).Split("."))[0]
-		$siteURL = "https://$tenantID.sharepoint.com"  
+		$siteURL = "https://$tenantID.sharepoint.com"
 		
 		# client context object and setting the credentials  
 		$Context = New-Object Microsoft.SharePoint.Client.ClientContext($SiteURL)
@@ -1125,6 +1125,9 @@ Function Get-SPOInventory{
 		}
 		Update-control -Synchash $synchash -control IMG_Report_SPOShared -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 	#endregion shared files and Sites
+	
+	# Updating "AT A GLANCE" 
+	Update-control -Synchash $SyncHash -control txtTotalSiteCollections -property text -value $SitesIncludingPersonal.count
 
 	# Output list of externally shared items
 	$SPO_ExternalShared | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Externally Shared.csv" -NoTypeInformation -Force 
@@ -1141,6 +1144,84 @@ Function Get-SPOInventory{
 	# Output libraries
 	$Databases | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Librariesgt100.csv" -NoTypeInformation -Force
 	$Databases | Export-Csv -Path "$($VariableHash.OutputPath)\SPO - Libraries.csv" -NoTypeInformation -Force 
+
+}
+
+Function get-AtAGlance{
+	# Reporting Event
+	$message = "Running At A Glance"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+	# Gathering information
+	$Tenant = Get-OrganizationConfig | Select-Object -ExpandProperty Name
+	$MSOLCompanyInfo = Get-MsolCompanyInformation
+	[System.String]$DirSyncEnabled = $MSOLCompanyInfo | Select-Object -ExpandProperty DirectorySynchronizationEnabled
+	$DirSyncLastSync = $MSOLCompanyInfo | Select-Object -ExpandProperty LastDirSyncTime
+	$PassSyncLastSync = $MSOLCompanyInfo | Select-Object -ExpandProperty LastPasswordSyncTime
+	[System.String]$PassSyncEnabled = $MSOLCompanyInfo | Select-Object -ExpandProperty PasswordSynchronizationEnabled
+	[System.String]$TenantDisplayName = $MSOLCompanyInfo | Select-Object -ExpandProperty DisplayName
+    [System.String]$TenantCountry = $MSOLCompanyInfo | Select-Object -ExpandProperty CountryLetterCode
+    [System.String]$TechContact = $MSOLCompanyInfo | Select-Object -ExpandProperty TechnicalNotificationEmails
+    [System.String]$TechContactPhone = $MSOLCompanyInfo | Select-Object -ExpandProperty TelephoneNumber
+	$MSOLAccountSKU = Get-MsolAccountSku
+    $TotalPlans = ($MSOLAccountSKU).count
+    $TotalLicenses = $MSOLAccountSKU | Measure-Object ActiveUnits -Sum | Select-Object -ExpandProperty Sum
+    $TotalLicensesAssigned = $MSOLAccountSKU | Measure-Object ConsumedUnits -Sum | Select-Object -ExpandProperty Sum
+	$FeaturesRelease = Get-OrganizationConfig | Select-Object -ExpandProperty ReleaseTrack
+
+	$Users = Get-MsolUser -All 
+	$UnLicensedUsers = $users | where {$_.IsLicensed -eq "False"}
+	$syncedUsers = $users | Where-Object {$_.ImmutableId -ne $null}
+	$CloudUsers = $users | Where-Object {$_.ImmutableId -eq $null}
+
+	$Contacts = get-msolcontact -All
+	$Guest = $users | Where-Object {$_.UserType -eq "Guest"}
+	$groups = Get-MsolGroup -All
+	$mailboxes = Get-Mailbox -ResultSize Unlimited
+	$SharedMailboxes = $mailboxes | where-Object { $_.RecipientTypeDetails -eq 'SharedMailbox'} | Measure-Object
+	$RoomMailboxes = $mailboxes | where-Object { $_.RecipientTypeDetails -eq 'RoomMailbox'} | Measure-Object
+	$equipmentMailboxes = $mailboxes  | where-Object { $_.RecipientTypeDetails -eq 'EquipmentMailbox'} | Measure-Object
+	
+	# Accounting for randomness
+	if($DirSyncEnabled -eq $true){
+		Update-control -Synchash $SyncHash -control txtDirSyncLastSync -property text -value ($DirSyncLastSync).DateTime
+	}Else{
+		Update-control -Synchash $SyncHash -control txtDirSyncLastSync -property text -value "N/A"
+	}
+
+	if($PassSyncEnabled -eq $true){
+		Update-control -Synchash $SyncHash -control txtPassSyncLastSync -property text -value ($PassSyncLastSync).DateTime
+	}Else{
+		Update-control -Synchash $SyncHash -control txtPassSyncLastSync -property text -value "N/A"
+	}
+
+	$VariableHash.tenantname = $Tenant
+
+	# Updating "AT A GLANCE"
+	Update-control -Synchash $SyncHash -control txtTenant -property text -value $Tenant
+	Update-control -Synchash $SyncHash -control txtOrg -property text -value $TenantDisplayName
+	Update-control -Synchash $SyncHash -control txtCountry -property text -value $TenantCountry
+	Update-control -Synchash $SyncHash -control txtTechnicalContact -property text -value $TechContact
+	Update-control -Synchash $SyncHash -control txtContactPhone -property text -value $TechContactPhone
+	Update-control -Synchash $SyncHash -control txtTotalPlans -property text -value $TotalPlans
+	Update-control -Synchash $SyncHash -control txtTotalLicense -property text -value $TotalLicenses
+	Update-control -Synchash $SyncHash -control txtTotalAssignedLicenses -property text -value $TotalLicensesAssigned
+	Update-control -Synchash $SyncHash -control txtPassSyncEnabled -property text -value $PassSyncEnabled
+	Update-control -Synchash $SyncHash -control txtFeatureRelease -property text -value $FeaturesRelease
+
+	Update-control -Synchash $SyncHash -control txtTotalUsers -property text -value $Users.count
+	Update-control -Synchash $SyncHash -control txtTotalUnlicensedUsers -property text -value $UnLicensedUsers.count
+	Update-control -Synchash $SyncHash -control txtTotalSyncedUsers -property text -value $syncedUsers.count
+	Update-control -Synchash $SyncHash -control txtTotalCloudUsers -property text -value $CloudUsers.count
+	Update-control -Synchash $SyncHash -control txtTotalContacts -property text -value $Contacts.count
+	Update-control -Synchash $SyncHash -control txtTotalGuests -property text -value $Guest.count
+	Update-control -Synchash $SyncHash -control txtTotalTotalGroups -property text -value $groups.count
+	Update-control -Synchash $SyncHash -control txtTotalmailboxes -property text -value $mailboxes.count
+	Update-control -Synchash $SyncHash -control txtTotalSharedMailboxes -property text -value $SharedMailboxes.count
+	Update-control -Synchash $SyncHash -control txtTotalRooms -property text -value $RoomMailboxes.count
+	Update-control -Synchash $SyncHash -control txtTotalEquipment -property text -value $equipmentMailboxes.count
+	
 }
 
 Function Get-AADInventory{
@@ -1816,7 +1897,7 @@ Function get-AADDeletedUsers{
 			}
 		}
 				
-		Update-control -Synchash $synchash -control IMG_Report_AADDelUser -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_AADDelusers -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# export
 		$AADDeletedUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\AAD - Deleted User Report.csv" -NoTypeInformation -Force
@@ -2218,7 +2299,7 @@ Function get-PowerBIWorkspaces{
 			))   	
 		}
 	
-		Update-control -Synchash $synchash -control IMG_Report_PowerBIDashboards -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+		Update-control -Synchash $synchash -control IMG_Report_PowerBIReports -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 	#endregion
 
 	#region Datasources
@@ -2306,6 +2387,9 @@ Function Run-Reports{
 
 			# Calling connection function
 			Connect-M365 -Credentials $credentials -Region $VariableHash.TenantRegion -TenantName $VariableHash.tenantname -ExchangeOnline -AzureAD -MSOL -SharePointOnline
+
+			# At A Glance
+			get-AtAGlance
 
 			# Azure Active Directory User Report
 			get-AADInventory

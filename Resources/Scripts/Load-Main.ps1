@@ -53,9 +53,13 @@
 		Import-Module "$($VariableHash.ModuleDir)\M365InventoryAutomaton.psm1" -Force -DisableNameChecking
 
 		#region Connecting elements
+			$xaml.SelectNodes("//*[@*[contains(translate(name(.),'n','N'),'Name')]]") | ForEach {
+				$Synchash.Add($_.Name,$SyncHash.Window.FindName($_.Name))
+			}
+		<# Trying somethign else
 			#region TitleBar
 				# Titlebar textbxox
-				$synchash.MainWindow = $SyncHash.Window.FindName("MainWindo")
+				$synchash.MainWindow = $SyncHash.Window.FindName("MainWindow")
 				$synchash.TitleBar = $SyncHash.Window.FindName("TitleBar")
 				
 				# TitleBar text box
@@ -131,6 +135,7 @@
 				$synchash.EXOSubTab_Recipients = $SyncHash.Window.FindName("EXOSubTab_Recipients")
 				$synchash.DataGrid_EXOMailboxes = $SyncHash.Window.FindName("DataGrid_EXOMailboxes")				
 			#endregion Home Tab
+		#>
 		#endregion Connecting elements
 
 		#region Configuring elements
