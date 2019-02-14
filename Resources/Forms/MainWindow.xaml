@@ -191,7 +191,7 @@
                 <Image x:Name="IMG_TitleBar_Close" VerticalAlignment="Center" HorizontalAlignment="Center" Source="C:\Dev\M365 Inventory Automation (Metro)\M365 Inventory Automation (Metro)\Resources\Icons\appbar.Close_black.png"/>
             </Button>
             <!-- END Simple Titlebar -->
-            <TabControl x:Name="tabControl" Grid.Row="1" FontStyle="Italic" HorizontalAlignment="Left" BorderBrush="White" Foreground="White" Margin="0,0,0,0" Grid.ColumnSpan="6" VerticalAlignment="Top" Height="565" Width="998">
+            <TabControl x:Name="tabControl" Grid.Row="1" FontStyle="Italic" HorizontalAlignment="Left" BorderBrush="White" Foreground="White" Margin="0,0,0,0" Grid.ColumnSpan="6" VerticalAlignment="Top" Height="565" Width="998" BorderThickness="0">
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Template">
@@ -432,90 +432,215 @@
                         <!-- END  -->
                     </Grid>
                 </TabItem>
-                <TabItem Header="General" x:Name="TabItem_General" Foreground="Black" BorderBrush="White" Background="White">
+                <TabItem Header="At a Glance" x:Name="TabItem_General" Foreground="Black" BorderBrush="White" Background="White">
                     <Grid Margin="0,0,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="5"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="5"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="5"/>
-                            <ColumnDefinition Width="5"/>
-                            <ColumnDefinition Width="150"/>
-                            <ColumnDefinition Width="250"/>
-                        </Grid.ColumnDefinitions>
-                        <!-- General information -->
-                        <GroupBox x:Name="GenInfo" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="15" Header="TENANT AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
-                            <Label Content="Tenant:" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Organization:" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Country:" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Technical Contact:" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Contact Phone number:" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="DirSync Enabled:" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Last DirSync:" Grid.Row="8" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Password Sync Enabled:" Grid.Row="9" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Last Password Sync:" Grid.Row="10" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Feature release:" Grid.Row="11" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total plans:" Grid.Row="12" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Licenses:" Grid.Row="13" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total assigned licenses:" Grid.Row="14" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <TextBlock x:Name="txtTenant" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtOrg" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtCountry" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTechnicalContact" Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtContactPhone" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtDirSyncEnabled" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtDirSyncLastSync" Grid.Row="8" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtPassSyncEnabled" Grid.Row="9" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtPassSyncLastSync" Grid.Row="10" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtFeatureRelease" Grid.Row="11" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalPlans" Grid.Row="12" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalLicense" Grid.Row="13" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalAssignedLicenses" Grid.Row="14" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                        <GroupBox x:Name="ObjectInfo" Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="3" Grid.RowSpan="15" Header="OBJECT TOTALS AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
-                            <Label Content="Total Users:" Grid.Row="2" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Synced Users:" Grid.Row="3" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Cloud users:" Grid.Row="4" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total unlicensed users:" Grid.Row="5" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Contacts:" Grid.Row="6" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Guests:" Grid.Row="7" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Groups:" Grid.Row="8" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Mailboxes:" Grid.Row="9" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Shared Mailboxes:" Grid.Row="10" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Rooms:" Grid.Row="11" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Equipment:" Grid.Row="12" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <Label Content="Total Site Collections:" Grid.Row="13" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
-                            <TextBlock x:Name="txtTotalUsers" Grid.Row="2" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalSyncedUsers" Grid.Row="3" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalCloudUsers" Grid.Row="4" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalUnlicensedUsers" Grid.Row="5" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalContacts" Grid.Row="6" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalGuests" Grid.Row="7" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalTotalGroups" Grid.Row="8" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalmailboxes" Grid.Row="9" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalSharedMailboxes" Grid.Row="10" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalRooms" Grid.Row="11" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalEquipment" Grid.Row="12" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
-                            <TextBlock x:Name="txtTotalSiteCollections" Grid.Row="13" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                        <TabControl BorderThickness="0">
+                            <TabItem Header="Tenant">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="5"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- General information -->
+                                    <GroupBox x:Name="GenInfo" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="15" Header="GENERAL" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                                    <Label Content="Tenant:" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Organization:" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Country:" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Technical Contact:" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Contact Phone number:" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="DirSync Enabled:" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Last DirSync:" Grid.Row="8" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Password Sync Enabled:" Grid.Row="9" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Last Password Sync:" Grid.Row="10" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Feature release:" Grid.Row="11" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total plans:" Grid.Row="12" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Licenses:" Grid.Row="13" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total assigned licenses:" Grid.Row="14" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <TextBlock x:Name="txtTenant" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtOrg" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtCountry" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTechnicalContact" Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtContactPhone" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtDirSyncEnabled" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtDirSyncLastSync" Grid.Row="8" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtPassSyncEnabled" Grid.Row="9" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtPassSyncLastSync" Grid.Row="10" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtFeatureRelease" Grid.Row="11" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalPlans" Grid.Row="12" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalLicense" Grid.Row="13" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalAssignedLicenses" Grid.Row="14" Grid.Column="2" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <!-- Objects at a glance -->
+                                    <GroupBox x:Name="ObjectInfo" Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="3" Grid.RowSpan="15" Header="OBJECT TOTALS AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                                    <Label Content="Total Users:" Grid.Row="2" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Synced Users:" Grid.Row="3" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Cloud users:" Grid.Row="4" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total unlicensed users:" Grid.Row="5" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Contacts:" Grid.Row="6" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Guests:" Grid.Row="7" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Groups:" Grid.Row="8" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Mailboxes:" Grid.Row="9" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Shared Mailboxes:" Grid.Row="10" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Rooms:" Grid.Row="11" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Equipment:" Grid.Row="12" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Total Site Collections:" Grid.Row="13" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <TextBlock x:Name="txtTotalUsers" Grid.Row="2" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalSyncedUsers" Grid.Row="3" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalCloudUsers" Grid.Row="4" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalUnlicensedUsers" Grid.Row="5" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalContacts" Grid.Row="6" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalGuests" Grid.Row="7" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalTotalGroups" Grid.Row="8" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalmailboxes" Grid.Row="9" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalSharedMailboxes" Grid.Row="10" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalRooms" Grid.Row="11" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalEquipment" Grid.Row="12" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtTotalSiteCollections" Grid.Row="13" Grid.Column="6" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Normal"/>
+                                </Grid>
+                            </TabItem>
+                            <TabItem Header="Organization">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="5"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="10"/>
+                                    </Grid.ColumnDefinitions>
+                                    <GroupBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="9" Grid.RowSpan="14" Header="ORGANIZATION" Height="420" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                                    <Label Content="PF Enabled:" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="PF migration locked:" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="PF migration complete:" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="All mailtips enabled:" Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Mailtips to external recipients:" Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Mailtips group metrics:" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Mailtips large audience treshold:" Grid.Row="8" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="SCL Junk threshold:" Grid.Row="9" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Max Concurrent migrations:" Grid.Row="10" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Intune status:" Grid.Row="11" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Azure premium subscription:" Grid.Row="12" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Hybrid configuration status:" Grid.Row="13" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="MAPI over HTTP enabled:" Grid.Row="14" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Real time logging service:" Grid.Row="2" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Customer lock box:" Grid.Row="3" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Link Preview:" Grid.Row="4" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Audit disabled:" Grid.Row="5" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Connectors for Outlook:" Grid.Row="6" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Connectors for Teams:" Grid.Row="7" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Connectors for SharePoint:" Grid.Row="8" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Connectors for Yammer:" Grid.Row="9" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Licensing Enforced:" Grid.Row="10" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Tenant access blocked:" Grid.Row="11" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Tenant in grace period:" Grid.Row="12" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Organization upgrading:" Grid.Row="13" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Service plan updating:" Grid.Row="14" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="ADFS Authentication config:" Grid.Row="2" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="ADFS Issuer:" Grid.Row="3" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="ADFS Audience URIs:" Grid.Row="4" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="ADFS Cert Thumbprint:" Grid.Row="5" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Default data encryption policy:" Grid.Row="6" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Mailbox data encryption enabled:" Grid.Row="7" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Default Authentication policy:" Grid.Row="8" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Tenant creation:" Grid.Row="9" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Guests enabled:" Grid.Row="10" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Groups creation enabled:" Grid.Row="11" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Hidden membership groups:" Grid.Row="12" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="Default group access type:" Grid.Row="13" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <Label Content="In-place holds:" Grid.Row="14" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="12" FontStyle="Normal" FontWeight="DemiBold"/>
+                                    <TextBlock x:Name="txtPublicFoldersEnabled" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtPublicFoldersLockedForMigration" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtPublicFolderMigrationComplete" Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMailTipsAllTipsEnabled" Grid.Row="5" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMailTipsExternalRecipientsTipsEnabled" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMailTipsGroupMetricsEnabled" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMailTipsLargeAudienceThreshold" Grid.Row="8" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtSCLJunkThreshold" Grid.Row="9" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMaxConcurrentMigrations" Grid.Row="10" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtIntuneManagedStatus" Grid.Row="11" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtAzurePremiumSubscriptionStatus" Grid.Row="12" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtHybridConfigurationStatus" Grid.Row="13" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMapiHttpEnabled" Grid.Row="14" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtRealTimeLogServiceEnabled" Grid.Row="2" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtCustomerLockboxEnabled" Grid.Row="3" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtLinkPreviewEnabled" Grid.Row="4" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtAuditDisabled" Grid.Row="5" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtConnectorsEnabledForOutlook" Grid.Row="6" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtConnectorsEnabledForTeams" Grid.Row="7" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtConnectorsEnabledForSharepoint" Grid.Row="8" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtConnectorsEnabledForYammer" Grid.Row="9" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtIsLicensingEnforced" Grid.Row="10" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtIsTenantAccessBlocked" Grid.Row="11" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtIsTenantInGracePeriod" Grid.Row="12" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtIsUpgradingOrganization" Grid.Row="13" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtIsUpdatingServicePlan" Grid.Row="14" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtAdfsAuthenticationConfiguration" Grid.Row="2" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtAdfsIssuer" Grid.Row="3" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtAdfsAudienceUris" Grid.Row="4" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtAdfsSignCertificateThumbprints" Grid.Row="5" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtDefaultDataEncryptionPolicy" Grid.Row="6" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtMailboxDataEncryptionEnabled" Grid.Row="7" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtDefaultAuthenticationPolicy" Grid.Row="8" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtWhenCreated" Grid.Row="9" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtGuestsEnabled" Grid.Row="10" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtGroupsCreationEnabled" Grid.Row="11" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtHiddenMembershipGroupsCreationEnabled" Grid.Row="12" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtDefaultGroupAccessType" Grid.Row="13" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                    <TextBlock x:Name="txtInPlaceHolds" Grid.Row="14" Grid.Column="8" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="Normal"/>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Azure AD" x:Name="TabItem_AAD" Foreground="Black" BorderBrush="White" Background="White">
@@ -585,7 +710,7 @@
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <GroupBox x:Name="EXOGenInfo" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="14" Header="TENANT AT A GLANCE" Height="425" VerticalAlignment="Top" BorderBrush="SkyBlue"/>
+                                    
                                 </Grid>
                             </TabItem>
                         </TabControl>

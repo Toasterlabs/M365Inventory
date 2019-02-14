@@ -35,9 +35,6 @@
 			Add-Type –assemblyName WindowsBase # Required for MahApps.Metro
 			Add-Type –assemblyName System.Drawing # Required for MahApps.Metro
 			Add-Type -AssemblyName System.Windows.Forms # Required to use the folder browser dialog
-			[System.Reflection.Assembly]::LoadFrom("$($VariableHash.LibDir)\ControlzEx.dll") | out-null
-			[System.Reflection.Assembly]::LoadFrom("$($VariableHash.LibDir)\MahApps.Metro.dll") | out-null
-			[System.Reflection.Assembly]::LoadFrom("$($VariableHash.LibDir)\MahApps.Metro.IconPacks.dll") | out-null
 		
 			# Loading XAML code	
 			[xml]$xaml = Get-Content -Path "$($VariableHash.FormsDir)\MainWindow.xaml"
@@ -339,6 +336,12 @@
 				$message = "Starting information gathering"
 				Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 				Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+
+				# Connections
+				$synchash.IMG_Conn_AAD.Source = "$($VariableHash.IconsDir)\Light.Orange.ico"
+				$synchash.IMG_Conn_EXO.Source = "$($VariableHash.IconsDir)\Light.Orange.ico"
+				$synchash.IMG_Conn_MSOL.Source = "$($VariableHash.IconsDir)\Light.Orange.ico"
+				$synchash.IMG_Conn_SPO.Source = "$($VariableHash.IconsDir)\Light.Orange.ico"
 
 				Run-reports
 			})

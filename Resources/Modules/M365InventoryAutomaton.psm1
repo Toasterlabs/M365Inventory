@@ -699,7 +699,8 @@ function Connect-M365{
 			}
 		}
 		}
-		# Connect to Azure AD
+		
+	# Connect to Azure AD
 		If($AzureAD){
 			# Reporting event
 			$message = "Connecting to Azure Active Directory"
@@ -743,7 +744,7 @@ function Connect-M365{
 				Connect-SPOService -Url https://$TenantName-admin.sharepoint.com -credential $credentials -Region $global:M365Services['SharePointRegion']
 				Update-control -Synchash $synchash -control IMG_Conn_SPO -property Source -value "$($VariableHash.IconsDir)\Light.green.ico"
 			}Catch{
-				Update-control -Synchash $synchash -control IMG_Conn_M365 -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
+				Update-control -Synchash $synchash -control IMG_Conn_SPO -property Source -value "$($VariableHash.IconsDir)\Light.red.ico"
 			}
 
 		}
@@ -1153,36 +1154,97 @@ Function get-AtAGlance{
 	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
-	# Gathering information
-	$Tenant = Get-OrganizationConfig | Select-Object -ExpandProperty Name
-	$MSOLCompanyInfo = Get-MsolCompanyInformation
-	[System.String]$DirSyncEnabled = $MSOLCompanyInfo | Select-Object -ExpandProperty DirectorySynchronizationEnabled
-	$DirSyncLastSync = $MSOLCompanyInfo | Select-Object -ExpandProperty LastDirSyncTime
-	$PassSyncLastSync = $MSOLCompanyInfo | Select-Object -ExpandProperty LastPasswordSyncTime
-	[System.String]$PassSyncEnabled = $MSOLCompanyInfo | Select-Object -ExpandProperty PasswordSynchronizationEnabled
-	[System.String]$TenantDisplayName = $MSOLCompanyInfo | Select-Object -ExpandProperty DisplayName
-    [System.String]$TenantCountry = $MSOLCompanyInfo | Select-Object -ExpandProperty CountryLetterCode
-    [System.String]$TechContact = $MSOLCompanyInfo | Select-Object -ExpandProperty TechnicalNotificationEmails
-    [System.String]$TechContactPhone = $MSOLCompanyInfo | Select-Object -ExpandProperty TelephoneNumber
-	$MSOLAccountSKU = Get-MsolAccountSku
-    $TotalPlans = ($MSOLAccountSKU).count
-    $TotalLicenses = $MSOLAccountSKU | Measure-Object ActiveUnits -Sum | Select-Object -ExpandProperty Sum
-    $TotalLicensesAssigned = $MSOLAccountSKU | Measure-Object ConsumedUnits -Sum | Select-Object -ExpandProperty Sum
-	$FeaturesRelease = Get-OrganizationConfig | Select-Object -ExpandProperty ReleaseTrack
+	#region Gathering information
+		<#
+			No animals were hurt during the commenting of code. I might have gone slightly insane though. Lack of sleep does that to you!
+		#>
 
-	$Users = Get-MsolUser -All 
-	$UnLicensedUsers = $users | where {$_.IsLicensed -eq "False"}
-	$syncedUsers = $users | Where-Object {$_.ImmutableId -ne $null}
-	$CloudUsers = $users | Where-Object {$_.ImmutableId -eq $null}
+		#Retrieving tenant name
+		$Tenant = Get-OrganizationConfig | Select-Object -ExpandProperty Name
 
-	$Contacts = get-msolcontact -All
-	$Guest = $users | Where-Object {$_.UserType -eq "Guest"}
-	$groups = Get-MsolGroup -All
-	$mailboxes = Get-Mailbox -ResultSize Unlimited
-	$SharedMailboxes = $mailboxes | where-Object { $_.RecipientTypeDetails -eq 'SharedMailbox'} | Measure-Object
-	$RoomMailboxes = $mailboxes | where-Object { $_.RecipientTypeDetails -eq 'RoomMailbox'} | Measure-Object
-	$equipmentMailboxes = $mailboxes  | where-Object { $_.RecipientTypeDetails -eq 'EquipmentMailbox'} | Measure-Object
-	
+        # Setting variablehash tenant
+        $variablehash.tenantname = $Tenant
+		
+		# Retrieving company information as registered
+		$MSOLCompanyInfo = Get-MsolCompanyInformation
+
+		# Are we dir syncing?
+		[System.String]$DirSyncEnabled = $MSOLCompanyInfo | Select-Object -ExpandProperty DirectorySynchronizationEnabled
+		
+		# When was the last sync
+		$DirSyncLastSync = $MSOLCompanyInfo | Select-Object -ExpandProperty LastDirSyncTime
+		
+		# Pass sync on?
+		[System.String]$PassSyncEnabled = $MSOLCompanyInfo | Select-Object -ExpandProperty PasswordSynchronizationEnabled
+		
+		# When was the last sync?
+		$PassSyncLastSync = $MSOLCompanyInfo | Select-Object -ExpandProperty LastPasswordSyncTime
+		
+		# Tenant display name
+		[System.String]$TenantDisplayName = $MSOLCompanyInfo | Select-Object -ExpandProperty DisplayName
+		
+		# Country for the tenant?
+		[System.String]$TenantCountry = $MSOLCompanyInfo | Select-Object -ExpandProperty CountryLetterCode
+		
+		# Who to annoy if things break
+		[System.String]$TechContact = $MSOLCompanyInfo | Select-Object -ExpandProperty TechnicalNotificationEmails
+		
+		# And how to reach them
+		[System.String]$TechContactPhone = $MSOLCompanyInfo | Select-Object -ExpandProperty TelephoneNumber
+		
+		# What SKU's exist?
+		$MSOLAccountSKU = Get-MsolAccountSku
+
+		# How many?
+		$TotalPlans = ($MSOLAccountSKU).count
+		
+		# Total amount of licenses?
+		$TotalLicenses = $MSOLAccountSKU | Measure-Object ActiveUnits -Sum | Select-Object -ExpandProperty Sum
+		
+		# Total assigned
+		$TotalLicensesAssigned = $MSOLAccountSKU | Measure-Object ConsumedUnits -Sum | Select-Object -ExpandProperty Sum
+		
+		# Release ring?
+		$FeaturesRelease = Get-OrganizationConfig | Select-Object -ExpandProperty ReleaseTrack
+
+		# Get me the users... ALL OF THEM!
+		$Users = Get-MsolUser -All 
+
+		# Who dares go unlicensed?
+		$UnLicensedUsers = $users | where {$_.IsLicensed -eq "False"}
+		
+		# Who has defected from on-premises?
+		$syncedUsers = $users | Where-Object {$_.ImmutableId -ne $null}
+		
+		# Who is native?
+		$CloudUsers = $users | Where-Object {$_.ImmutableId -eq $null}
+
+		# Where are the contacts?
+		$Contacts = get-msolcontact -All
+		
+		# Who is with us?
+		$Guest = $users | Where-Object {$_.UserType -eq "Guest"}
+		
+		# Which factions exist>
+		$groups = Get-MsolGroup -All
+		
+		# Who has email
+		$mailboxes = Get-Mailbox -ResultSize Unlimited
+		
+		# Shared mailboxes
+		$SharedMailboxes = $mailboxes | where-Object { $_.RecipientTypeDetails -eq 'SharedMailbox'} | Measure-Object
+		
+		# how many room mailboxes exi
+		$RoomMailboxes = $mailboxes | where-Object { $_.RecipientTypeDetails -eq 'RoomMailbox'} | Measure-Object
+
+		# Equipment mailboxes?
+		$equipmentMailboxes = $mailboxes  | where-Object { $_.RecipientTypeDetails -eq 'EquipmentMailbox'} | Measure-Object
+
+		# Now for the fun stuff! (EXO command btw)
+		$OrgConfig = Get-OrganizationConfig
+	#region Gathering information
+
+	#region updating fields
 	# Accounting for randomness
 	if($DirSyncEnabled -eq $true){
 		Update-control -Synchash $SyncHash -control txtDirSyncLastSync -property text -value ($DirSyncLastSync).DateTime
@@ -1222,6 +1284,46 @@ Function get-AtAGlance{
 	Update-control -Synchash $SyncHash -control txtTotalRooms -property text -value $RoomMailboxes.count
 	Update-control -Synchash $SyncHash -control txtTotalEquipment -property text -value $equipmentMailboxes.count
 	
+	Update-control -Synchash $SyncHash -control txtPublicFoldersEnabled -property text -value $OrgConfig.PublicFoldersEnabled
+	Update-control -Synchash $SyncHash -control txtPublicFoldersLockedForMigration -property text -value $OrgConfig.PublicFoldersLockedForMigration
+	Update-control -Synchash $SyncHash -control txtPublicFolderMigrationComplete -property text -value $OrgConfig.PublicFolderMigrationComplete
+	Update-control -Synchash $SyncHash -control txtMailTipsAllTipsEnabled -property text -value $OrgConfig.MailTipsAllTipsEnabled
+	Update-control -Synchash $SyncHash -control txtMailTipsExternalRecipientsTipsEnabled -property text -value $OrgConfig.MailTipsExternalRecipientsTipsEnabled
+	Update-control -Synchash $SyncHash -control txtMailTipsGroupMetricsEnabled -property text -value $OrgConfig.MailTipsGroupMetricsEnabled
+	Update-control -Synchash $SyncHash -control txtMailTipsLargeAudienceThreshold -property text -value $OrgConfig.MailTipsLargeAudienceThreshold
+	Update-control -Synchash $SyncHash -control txtSCLJunkThreshold -property text -value $OrgConfig.SCLJunkThreshold
+	Update-control -Synchash $SyncHash -control txtMaxConcurrentMigrations -property text -value $OrgConfig.MaxConcurrentMigrations
+	Update-control -Synchash $SyncHash -control txtIntuneManagedStatus -property text -value $OrgConfig.IntuneManagedStatus
+	Update-control -Synchash $SyncHash -control txtAzurePremiumSubscriptionStatus -property text -value $OrgConfig.AzurePremiumSubscriptionStatus
+	Update-control -Synchash $SyncHash -control txtHybridConfigurationStatus -property text -value $OrgConfig.HybridConfigurationStatus
+	Update-control -Synchash $SyncHash -control txtMapiHttpEnabled -property text -value $OrgConfig.MapiHttpEnabled
+	Update-control -Synchash $SyncHash -control txtRealTimeLogServiceEnabled -property text -value $OrgConfig.RealTimeLogServiceEnabled
+	Update-control -Synchash $SyncHash -control txtCustomerLockboxEnabled -property text -value $OrgConfig.CustomerLockboxEnabled
+	Update-control -Synchash $SyncHash -control txtLinkPreviewEnabled -property text -value $OrgConfig.LinkPreviewEnabled
+	Update-control -Synchash $SyncHash -control txtAuditDisabled -property text -value $OrgConfig.AuditDisabled
+	Update-control -Synchash $SyncHash -control txtConnectorsEnabledForOutlook -property text -value $OrgConfig.ConnectorsEnabledForOutlook
+	Update-control -Synchash $SyncHash -control txtConnectorsEnabledForTeams -property text -value $OrgConfig.ConnectorsEnabledForTeams
+	Update-control -Synchash $SyncHash -control txtConnectorsEnabledForSharepoint -property text -value $OrgConfig.ConnectorsEnabledForSharepoint
+	Update-control -Synchash $SyncHash -control txtConnectorsEnabledForYammer -property text -value $OrgConfig.ConnectorsEnabledForYammer
+	Update-control -Synchash $SyncHash -control txtIsLicensingEnforced -property text -value $OrgConfig.IsLicensingEnforced
+	Update-control -Synchash $SyncHash -control txtIsTenantAccessBlocked -property text -value $OrgConfig.IsTenantAccessBlocked 
+	Update-control -Synchash $SyncHash -control txtIsTenantInGracePeriod -property text -value $OrgConfig.IsTenantInGracePeriod
+	Update-control -Synchash $SyncHash -control txtIsUpgradingOrganization -property text -value $OrgConfig.IsUpgradingOrganization
+	Update-control -Synchash $SyncHash -control txtIsUpdatingServicePlan -property text -value $OrgConfig.IsUpdatingServicePlan
+	Update-control -Synchash $SyncHash -control txtAdfsAuthenticationConfiguration -property text -value $OrgConfig.AdfsAuthenticationConfiguration
+	Update-control -Synchash $SyncHash -control txtAdfsIssuer -property text -value $OrgConfig.AdfsIssuer
+	Update-control -Synchash $SyncHash -control txtAdfsAudienceUris -property text -value $OrgConfig.AdfsAudienceUris
+	Update-control -Synchash $SyncHash -control txtAdfsSignCertificateThumbprints -property text -value $OrgConfig.AdfsSignCertificateThumbprints
+	Update-control -Synchash $SyncHash -control txtDefaultDataEncryptionPolicy -property text -value $OrgConfig.DefaultDataEncryptionPolicy
+	Update-control -Synchash $SyncHash -control txtMailboxDataEncryptionEnabled -property text -value $OrgConfig.MailboxDataEncryptionEnabled
+	Update-control -Synchash $SyncHash -control txtDefaultAuthenticationPolicy -property text -value $OrgConfig.DefaultAuthenticationPolicy
+	Update-control -Synchash $SyncHash -control txtWhenCreated -property text -value $OrgConfig.WhenCreated
+	Update-control -Synchash $SyncHash -control txtGuestsEnabled -property text -value $OrgConfig.GuestsEnabled
+	Update-control -Synchash $SyncHash -control txtGroupsCreationEnabled -property text -value $OrgConfig.GroupsCreationEnabled
+	Update-control -Synchash $SyncHash -control txtHiddenMembershipGroupsCreationEnabled -property text -value $OrgConfig.iddenMembershipGroupsCreationEnabled
+	Update-control -Synchash $SyncHash -control txtDefaultGroupAccessType -property text -value $OrgConfig.DefaultGroupAccessType 
+	Update-control -Synchash $SyncHash -control txtInPlaceHolds -property text -value $OrgConfig.InPlaceHolds
+	#region updating fields
 }
 
 Function Get-AADInventory{
@@ -1805,6 +1907,10 @@ Function get-M365LicenseUsage{
 }
 
 Function get-AzureInventory{
+	# Reporting Event
+	$message = "Running Azure Inventory report"
+	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
+	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 	# Creating credentials object
 	$secpswd = ConvertTo-SecureString $VariableHash.M365password -AsPlainText -Force
@@ -2044,7 +2150,6 @@ Function get-ExchangeMailboxes{
 		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 		
 		# Export
-		Update-control -Synchash $SyncHash -control DataGrid_EXOMailboxes -property ItemsSource -value $ExchangeMailboxes_Observable
 		$ExchangeMailboxes_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\EXO - Mailboxes Report.csv" -NoTypeInformation -Force
 	}catch{
 		Update-control -Synchash $synchash -control IMG_Report_EXOMailboxes -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
@@ -2153,38 +2258,42 @@ function Get-Flows{
 	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
-	$Username = $variablehash.M365username
-	$password = $variablehash.M365password
-	$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
-	clear-variable password
-	Add-PowerAppsAccount -Username $Username -Password $SecurePass
+	$Flows_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$Flows_Observable.Clear()
 
-	$flows = get-flow | select DisplayName, Enabled
+	Try{
 
-	Foreach ($flow in $flows){
-		$Flows_Observable.Add((
-			New-Object PSObject -Property @{
-				DisplayName = $flow.DisplayName
-				Enabled = $flow.Enabled
-			}
-		))   			
+
+		$flows = get-flow | select DisplayName, Enabled
+
+		Foreach ($flow in $flows){
+			$Flows_Observable.Add((
+				New-Object PSObject -Property @{
+					DisplayName = $flow.DisplayName
+					Enabled = $flow.Enabled
+				}
+			))   			
+		}
+
+		$AdminFlows = Get-AdminFlow
+
+		Foreach ($adminflow in $AdminFlows){
+			$Flows_Observable.Add((
+				New-Object PSObject -Property @{
+					DisplayName = $adminflow.DisplayName
+					Enabled = $adminflow.Enabled
+				}
+			))   			
+		}
+
+		Update-control -Synchash $synchash -control IMG_Report_Flow -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+		# Export
+		$Flows_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\Microsoft Flow.csv" -NoTypeInformation -Force
+	}Catch{
+		Update-control -Synchash $synchash -control IMG_Report_Flow -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}
-
-	$AdminFlows = Get-AdminFlow
-
-	Foreach ($adminflow in $AdminFlows){
-		$Flows_Observable.Add((
-			New-Object PSObject -Property @{
-				DisplayName = $adminflow.DisplayName
-				Enabled = $adminflow.Enabled
-			}
-		))   			
-	}
-
-	Update-control -Synchash $synchash -control IMG_Report_Flow -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
-
-	# Export
-	$ExternalUsers_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\Microsoft Flow.csv" -NoTypeInformation -Force
+	
 }
 
 Function get-powerapps{
@@ -2193,35 +2302,38 @@ Function get-powerapps{
 	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
-	$Username = $variablehash.M365username
-	$password = $variablehash.M365password
-	$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
-	clear-variable password
-	Add-PowerAppsAccount -Username $Username -Password $SecurePass
+	$Apps_Observable = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$Apps_Observable.Clear()
 
-	$powerapps = get-adminpowerapp
+	Try{
 
-	foreach($app in $powerapps){
-		$Apps_Observable.Add((
-			New-Object PSObject -Property @{
-				DisplayName    = $app.Internal.Properties.DisplayName
-				Description    = $app.Internal.Properties.Description
-				CreatedBy      = $app.Internal.Properties.CreatedBy.userPrincipalName
-				SharedGroups   = $app.Internal.Properties.sharedGroupsCount
-				SharedAccounts = $app.Internal.Properties.sharedUsersCount
-				FeaturedApp    = $app.Internal.Properties.isFeaturedApp
-				ConsentBypass  = $app.Internal.Properties.bypassConsent
-				WebLink        = $app.Internal.Properties.appPackageDetails.webPackage.value
+		$powerapps = get-adminpowerapp
+
+		foreach($app in $powerapps){
+			$Apps_Observable.Add((
+				New-Object PSObject -Property @{
+					DisplayName    = $app.Internal.Properties.DisplayName
+					Description    = $app.Internal.Properties.Description
+					CreatedBy      = $app.Internal.Properties.CreatedBy.userPrincipalName
+					SharedGroups   = $app.Internal.Properties.sharedGroupsCount
+					SharedAccounts = $app.Internal.Properties.sharedUsersCount
+					FeaturedApp    = $app.Internal.Properties.isFeaturedApp
+					ConsentBypass  = $app.Internal.Properties.bypassConsent
+					WebLink        = $app.Internal.Properties.appPackageDetails.webPackage.value
 
 
-			}
-		))   			
+				}
+			))   			
+		}
+
+		Update-control -Synchash $synchash -control IMG_Report_PowerApps -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+
+		# Export
+		$Apps_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\Microsoft Powerapps.csv" -NoTypeInformation -Force
+	
+	}Catch{
+		Update-control -Synchash $synchash -control IMG_Report_PowerApps -property Source -Value "$($VariableHash.IconsDir)\Light.Red.ico"
 	}
-
-	Update-control -Synchash $synchash -control IMG_Report_PowerApps -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
-
-	# Export
-	$Apps_Observable | Export-Csv -Path "$($VariableHash.OutputPath)\Microsoft Powerapps.csv" -NoTypeInformation -Force
 }
 
 Function get-PowerBIWorkspaces{
@@ -2230,33 +2342,41 @@ Function get-PowerBIWorkspaces{
 	Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
-	$Username = $variablehash.M365username
-	$password = $variablehash.M365password
-	$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
-	$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Username,$SecurePass
-	clear-variable password
+	$PowerBI_Workspaces = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+	$PowerBI_Workspaces.Clear()
 
-	# Connecting
-	connect-PowerBIServiceAccount -credential $credentials
+	Try{
+		$Username = $variablehash.M365username
+		$password = $variablehash.M365password
+		$SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
+		$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $Username,$SecurePass
+		clear-variable password
 
-	#region Retrieving all workspaces
-	$workspaces = Get-PowerBIWorkspace -Scope Organization -All
+		# Connecting
+		connect-PowerBIServiceAccount -credential $credentials
 
-	Foreach($workspace in $workspaces){
-		$PowerBI_Workspaces.Add((
-			New-Object PSObject -Property @{
-				Name              = $workspace.Name
-				Type              = $workspace.Type
-				State             = $workspace.State
-				ReadOnly          = $workspace.IsReadOnly
-				Orphaned          = $workspace.IsOrphaned
-				DedicatedCapacity = $workspace.IsOnDedicatedCapacity
-				Users             = $workspace.Users
-			}
-		))   	
+		#region Retrieving all workspaces
+		$workspaces = Get-PowerBIWorkspace -Scope Organization -All
+
+		Foreach($workspace in $workspaces){
+			$PowerBI_Workspaces.Add((
+				New-Object PSObject -Property @{
+					Name              = $workspace.Name
+					Type              = $workspace.Type
+					State             = $workspace.State
+					ReadOnly          = $workspace.IsReadOnly
+					Orphaned          = $workspace.IsOrphaned
+					DedicatedCapacity = $workspace.IsOnDedicatedCapacity
+					Users             = $workspace.Users
+				}
+			))   	
+		}
+
+		Update-control -Synchash $synchash -control IMG_Report_PowerBIWorkspaces -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	}Catch{
+		Update-control -Synchash $synchash -control IMG_Report_PowerBIWorkspaces -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 	}
-
-	Update-control -Synchash $synchash -control IMG_Report_PowerBIWorkspaces -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+	
 	#endregion
 
 	#region dashboards
@@ -2265,19 +2385,27 @@ Function get-PowerBIWorkspaces{
 		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
-		$dashboards = Get-PowerBIDashboard -Scope Organization
+		$PowerBI_DashBoards = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+		$PowerBI_DashBoards.Clear()
 
-		foreach($dash in $dashboards){
-			$PowerBI_DashBoards.Add((
-				New-Object PSObject -Property @{
-					Name       = $dash.Name
-					ReadOnly   = $dash.IsReadOnly
-					ID         = $dash.Id
-				}
-			))   	
-		}
+		Try{
+			$dashboards = Get-PowerBIDashboard -Scope Organization
+
+			foreach($dash in $dashboards){
+				$PowerBI_DashBoards.Add((
+					New-Object PSObject -Property @{
+						Name       = $dash.Name
+						ReadOnly   = $dash.IsReadOnly
+						ID         = $dash.Id
+					}
+				))   	
+			}
 	
-		Update-control -Synchash $synchash -control IMG_Report_PowerBIDashboards -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+			Update-control -Synchash $synchash -control IMG_Report_PowerBIDashboards -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+		}Catch{
+			Update-control -Synchash $synchash -control IMG_Report_PowerBIDashboards -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
+		}
+		
 	#endregion
 
 	#region reports
@@ -2286,20 +2414,27 @@ Function get-PowerBIWorkspaces{
 		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
-		$reports = Get-PowerBIDashboard -Scope Organization
+		$PowerBI_Reports = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+		$PowerBI_Reports.Clear()
 
-		foreach($report in $reports){
-			$PowerBI_Reports.Add((
-				New-Object PSObject -Property @{
-					Name       = $report.Name
-					ID         = $report.Id
-					DataSetID  = $reports.DataSetID
-					WebURL     = $report.WebURL
-				}
-			))   	
-		}
+		try{
+			$reports = Get-PowerBIDashboard -Scope Organization
+
+			foreach($report in $reports){
+				$PowerBI_Reports.Add((
+					New-Object PSObject -Property @{
+						Name       = $report.Name
+						ID         = $report.Id
+						DataSetID  = $reports.DataSetID
+						WebURL     = $report.WebURL
+					}
+				))   	
+			}
 	
-		Update-control -Synchash $synchash -control IMG_Report_PowerBIReports -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+			Update-control -Synchash $synchash -control IMG_Report_PowerBIReports -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+		}Catch{
+			Update-control -Synchash $synchash -control IMG_Report_PowerBIReports -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
+		}
 	#endregion
 
 	#region Datasources
@@ -2307,30 +2442,37 @@ Function get-PowerBIWorkspaces{
 		$message = "Running Microsoft PowerBI datasources report"
 		Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 		Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
+		
+		$PowerBI_Datasets = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+		$PowerBI_Datasets.Clear()
+		
+		try{
+			$Datasets = Get-PowerBIDataset -Scope Organization
 
-		$Datasets = Get-PowerBIDataset -Scope Organization
+			Foreach($Set in $datasets){
+				$PowerBI_Datasets.Add((
+					New-Object PSObject -Property @{
+						Name                           = $Set.Name
+						ConfiguredBy                   = $Set.ConfiguredBy
+						RetentionPolicy                = $Set.DefaultRetentionPolicy
+						AddRowsAPI                     = $Set.AddRowsApiEnabled
+						Tables                         = $Set.Tables
+						WebURL                         = $Set.WebUrl
+						Relationships                  = $Set.Relationships
+						Datasources                    = $Set.Datasources
+						DefaultMode                    = $Set.DefaultMode
+						Refreshable                    = $Set.IsRefreshable
+						EffectiveIdentityRequired      = $Set.IsEffectiveIdentityRequired
+						EffectiveIdentityRolesRequired = $Set.IsEffectiveIdentityRolesRequired
+						OnPremGatewayRequired          = $Set.IsOnPremGatewayRequired
+					}
+				))   	
+			}
 
-		Foreach($Set in $datasets){
-			$PowerBI_Datasets.Add((
-				New-Object PSObject -Property @{
-					Name                           = $Set.Name
-					ConfiguredBy                   = $Set.ConfiguredBy
-					RetentionPolicy                = $Set.DefaultRetentionPolicy
-					AddRowsAPI                     = $Set.AddRowsApiEnabled
-					Tables                         = $Set.Tables
-					WebURL                         = $Set.WebUrl
-					Relationships                  = $Set.Relationships
-					Datasources                    = $Set.Datasources
-					DefaultMode                    = $Set.DefaultMode
-					Refreshable                    = $Set.IsRefreshable
-					EffectiveIdentityRequired      = $Set.IsEffectiveIdentityRequired
-					EffectiveIdentityRolesRequired = $Set.IsEffectiveIdentityRolesRequired
-					OnPremGatewayRequired          = $Set.IsOnPremGatewayRequired
-				}
-			))   	
+			Update-control -Synchash $synchash -control IMG_Report_PowerBIDatasources -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
+		}Catch{
+			Update-control -Synchash $synchash -control IMG_Report_PowerBIDatasources -property Source -Value "$($VariableHash.IconsDir)\Light.red.ico"
 		}
-
-		Update-control -Synchash $synchash -control IMG_Report_PowerBIDatasources -property Source -Value "$($VariableHash.IconsDir)\Light.green.ico"
 
 	#endregion
 
@@ -2348,7 +2490,6 @@ Function Run-Reports{
 	Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 
 	# Variables
-	$VariableHash.tenantname = $SyncHash.txt_Home_Tenant.text
 	$VariableHash.GraphAppID = $syncHash.txt_Home_GraphAppID.Text
 	$VariableHash.TenantRegion = $SyncHash.DD_Home_Region.CurrentItem
 	$VariableHash.M365username = $synchash.txt_Home_Username.Text
@@ -2379,19 +2520,79 @@ Function Run-Reports{
 		Import-Module "$($VariableHash.ModuleDir)M365InventoryAutomaton.psm1" -Force -DisableNameChecking
 
 		If($VariableHash.M365Username){
+            #region PowerBi Runspace
+                $PowerBI_Runspace =[runspacefactory]::CreateRunspace()
+                $SyncHash.PowerBI_Runspace = $PowerBI_Runspace
+                $PowerBI_Runspace.ApartmentState = "STA"
+                $PowerBI_Runspace.ThreadOptions = "ReuseThread"
+                $PowerBI_Runspace.Open()
 
-		
+                # Passing variables
+                $PowerBI_Runspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+                $PowerBI_Runspace.SessionStateProxy.SetVariable("VariableHash",$VariableHash)
+					
+                # Create powershell object which will containt the code we're running in the runspace
+                $psCmd = [PowerShell]::Create()
+
+                # Add runspace to Powershell object
+                $psCmd.Runspace = $PowerBI_Runspace
+
+                [Void]$psCmd.AddScript({
+	                # Importing module
+	                Import-Module "$($VariableHash.ModuleDir)M365InventoryAutomaton.psm1" -Force -DisableNameChecking
+
+	                # PowerBI Workpaces
+	                get-PowerBIWorkspaces
+                })
+
+                # Begin!
+                $data = $psCmd.BeginInvoke()
+            #endregion PowerBi Runspace
+
+            #region Azure Inventory
+                $AzureInventory_Runspace =[runspacefactory]::CreateRunspace()
+                $SyncHash.AzureInventory_Runspace = $AzureInventory_Runspace
+                $AzureInventory_Runspace.ApartmentState = "STA"
+                $AzureInventory_Runspace.ThreadOptions = "ReuseThread"
+                $AzureInventory_Runspace.Open()
+
+                # Passing variables
+                $AzureInventory_Runspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
+                $AzureInventory_Runspace.SessionStateProxy.SetVariable("VariableHash",$VariableHash)
+					
+                # Create powershell object which will containt the code we're running in the runspace
+                $psCmd = [PowerShell]::Create()
+
+                # Add runspace to Powershell object
+                $psCmd.Runspace = $AzureInventory_Runspace
+
+                [Void]$psCmd.AddScript({
+	                # Importing module
+	                Import-Module "$($VariableHash.ModuleDir)M365InventoryAutomaton.psm1" -Force -DisableNameChecking
+                    import-module AzureRM
+
+        			# Azure Inventory
+		        	get-AzureInventory
+                })
+
+                # Begin!
+                $data = $psCmd.BeginInvoke()
+            #endregion PowerBi Runspace
+
 			# Creating credentials object
 			$secpswd = ConvertTo-SecureString $VariableHash.M365password -AsPlainText -Force
 			$credentials = new-object -typename System.Management.Automation.PSCredential -argumentlist $VariableHash.M365Username,$secpswd
 
 			# Calling connection function
-			Connect-M365 -Credentials $credentials -Region $VariableHash.TenantRegion -TenantName $VariableHash.tenantname -ExchangeOnline -AzureAD -MSOL -SharePointOnline
+			Connect-M365 -Credentials $credentials -Region $VariableHash.TenantRegion -TenantName $VariableHash.tenantname -ExchangeOnline -AzureAD -MSOL
 
 			# At A Glance
 			get-AtAGlance
 
-			# Azure Active Directory User Report
+            # Connect to SharePoint Online
+            Connect-M365 -Credentials $credentials -Region $VariableHash.TenantRegion -TenantName $VariableHash.tenantname -SharePointOnline
+			
+            # Azure Active Directory User Report
 			get-AADInventory
 
 			# SPO site inventories
@@ -2436,18 +2637,21 @@ Function Run-Reports{
 			# License usage report
 			get-M365LicenseUsage
 
-			# Azure Inventory
-			get-AzureInventory
+			# External Users
+			get-ExternalUsers
+
+            # Credentials and logging in to flow/powerapps
+            $Username = $variablehash.M365username
+		    $password = $variablehash.M365password
+		    $SecurePass = ConvertTo-SecureString $password -AsPlainText -Force
+		    clear-variable password
+		    Add-PowerAppsAccount -Username $Username -Password $SecurePass
+
+			# Powerapps
+			get-powerapps
 
 			# Flows
 			get-flows
-
-			# Ppowerapps
-			get-powerapps
-
-			# PowerBI Workpaces
-			get-PowerBIWorkspaces
-
 			# Disconnecting exchange (Pesky little session limit...)
 			
 			# Reporting event
@@ -2455,7 +2659,7 @@ Function Run-Reports{
 			Update-control -Synchash $SyncHash -control txt_output -property text -value $message -AppendContent
 			Invoke-logging -loglevel INFO -message $message -Runlog $VariableHash.logFile
 	
-			Remove-PSSession $Session
+			Remove-PSSession $Session365
 			Update-control -Synchash $synchash -control IMG_Conn_EXO -property Source -value "$($VariableHash.IconsDir)\Check_Waiting.ico"
 						
 			# Reporting event
@@ -2621,8 +2825,8 @@ function Invoke-ColorOutput{
     )    
 
     # Save previous colors
-    $previousForegroundColor = $host.UI.RawUI.ForegroundColor
-    $previousBackgroundColor = $host.UI.RawUI.BackgroundColor
+    #$previousForegroundColor = $host.UI.RawUI.ForegroundColor
+    #$previousBackgroundColor = $host.UI.RawUI.BackgroundColor
 
     # Set BackgroundColor if available
     if($BackgroundColor -ne $null)
@@ -2652,8 +2856,8 @@ function Invoke-ColorOutput{
     }
 
     # Restore previous colors
-    $host.UI.RawUI.ForegroundColor = $previousForegroundColor
-    $host.UI.RawUI.BackgroundColor = $previousBackgroundColor
+    #$host.UI.RawUI.ForegroundColor = $previousForegroundColor
+    #$host.UI.RawUI.BackgroundColor = $previousBackgroundColor
 }
 
 Function Invoke-Logging{
